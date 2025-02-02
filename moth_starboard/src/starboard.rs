@@ -3,7 +3,8 @@ use crate::{
     reactions::{get_reaction_count, get_unique_reaction_count},
 };
 use moth_data::database::{
-    ChannelIdWrapper, MessageIdWrapper, StarboardMessage, StarboardStatus, UserIdWrapper,
+    ChannelIdWrapper, MaybeMessageIdWrapper, MessageIdWrapper, StarboardMessage, StarboardStatus,
+    UserIdWrapper,
 };
 use poise::serenity_prelude as serenity;
 use std::sync::Arc;
@@ -175,6 +176,12 @@ async fn new(
 ) -> Result<(), Error> {
     let msg = reaction.message(ctx).await?;
 
+    let (content, forwarded) = if let Some(snapshot) = msg.message_snapshots.first() {
+        (snapshot.content.clone(), true)
+    } else {
+        (msg.content.to_string(), false)
+    };
+
     if msg.author.id == reaction.user_id.unwrap() {
         remove_reaction(ctx, reaction).await;
         return Ok(());
@@ -192,7 +199,7 @@ async fn new(
         user_id: UserIdWrapper(msg.author.id),
         username: msg.author.name.to_string(),
         avatar_url: msg.author.avatar_url(),
-        content: msg.content.to_string(),
+        content,
         channel_id: ChannelIdWrapper(msg.channel_id),
         message_id: MessageIdWrapper(msg.id),
         attachment_urls: msg
@@ -209,6 +216,13 @@ async fn new(
         // gets corrected on insert.
         starboard_message_id: MessageIdWrapper(0.into()),
         starboard_message_channel: ChannelIdWrapper(data.starboard_config.queue_channel),
+        forwarded,
+        reply_message_id: MaybeMessageIdWrapper(
+            msg.referenced_message
+                .as_ref()
+                .map(|m| MessageIdWrapper(m.id)),
+        ),
+        reply_username: msg.referenced_message.map(|m| m.author.name.to_string()),
     };
 
     let message = starboard_message(ctx, data, &starboard_msg);
@@ -323,9 +337,19 @@ fn starboard_embeds<'a>(
         author = author.icon_url(url);
     }
 
+    // TODO: don't hardcode the emoji
+    let description = if starboard_msg.forwarded {
+        format!(
+            ">>> <:forwarded:1327717562498420807> ***Forwarded***\n{}",
+            starboard_msg.content
+        )
+    } else {
+        starboard_msg.content.clone()
+    };
+
     let mut embed = serenity::CreateEmbed::new()
         .author(author.clone())
-        .description(&starboard_msg.content)
+        .description(description)
         .color(serenity::Colour::BLUE)
         // deduplication of embeds.
         .url("https://osucord.moe")
@@ -337,6 +361,18 @@ fn starboard_embeds<'a>(
             starboard_msg.attachment_urls.join("\n"),
             false,
         );
+    }
+
+    if let Some(reply_user_name) = &starboard_msg.reply_username {
+        let link = format!(
+            "[{reply_user_name}](https://discord.com/channels/{}/{}/{})",
+            data.starboard_config.guild_id,
+            *starboard_msg.channel_id,
+            // theoretically a spot for a panic but i never insert it without sooo...
+            *starboard_msg.reply_message_id.unwrap(),
+        );
+
+        embed = embed.field("Replying to...", link, false)
     }
 
     // hardcoding wooooooo

@@ -39,6 +39,35 @@ macro_rules! id_wrapper {
     };
 }
 
+id_wrapper!(UserIdWrapper, UserId);
+id_wrapper!(ChannelIdWrapper, ChannelId);
+id_wrapper!(MessageIdWrapper, MessageId);
+
+/// Because don't we all hate the orphan rule.
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct MaybeMessageIdWrapper(pub Option<MessageIdWrapper>);
+
+impl MaybeMessageIdWrapper {
+    #[must_use]
+    pub fn new(option: Option<MessageIdWrapper>) -> Self {
+        MaybeMessageIdWrapper(option)
+    }
+}
+
+impl From<Option<i64>> for MaybeMessageIdWrapper {
+    fn from(option: Option<i64>) -> Self {
+        MaybeMessageIdWrapper(option.map(MessageIdWrapper::from))
+    }
+}
+
+impl Deref for MaybeMessageIdWrapper {
+    type Target = Option<MessageIdWrapper>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 pub async fn init_data() -> Database {
     let database_url =
         env::var("DATABASE_URL").expect("No database url found in environment variables!");
@@ -140,10 +169,6 @@ pub struct Checks {
     pub owners_single: DashMap<String, HashSet<UserId>>,
 }
 
-id_wrapper!(UserIdWrapper, UserId);
-id_wrapper!(ChannelIdWrapper, ChannelId);
-id_wrapper!(MessageIdWrapper, MessageId);
-
 #[derive(Clone, Debug)]
 pub struct StarboardMessage {
     pub id: i32,
@@ -158,6 +183,9 @@ pub struct StarboardMessage {
     pub starboard_status: StarboardStatus,
     pub starboard_message_id: MessageIdWrapper,
     pub starboard_message_channel: ChannelIdWrapper,
+    pub reply_message_id: MaybeMessageIdWrapper,
+    pub reply_username: Option<String>,
+    pub forwarded: bool,
 }
 
 #[derive(Debug, Clone, sqlx::Type, PartialEq)]
@@ -400,7 +428,7 @@ impl Database {
     async fn get_starboard_msg_(&self, msg_id: MessageId) -> Result<StarboardMessage, sqlx::Error> {
         sqlx::query_as!(StarboardMessage,
         r#"
-        SELECT id, user_id, username, avatar_url, content, channel_id, message_id, attachment_urls, star_count, starboard_message_id, starboard_message_channel, starboard_status as "starboard_status: StarboardStatus"
+        SELECT id, user_id, username, avatar_url, content, channel_id, message_id, attachment_urls, star_count, starboard_message_id, starboard_message_channel, starboard_status as "starboard_status: StarboardStatus", reply_message_id, forwarded, reply_username
         FROM starboard
         WHERE message_id = $1
         "#, msg_id.get() as i64)
@@ -471,12 +499,12 @@ impl Database {
                 INSERT INTO starboard (
                     user_id, username, avatar_url, content, channel_id, message_id,
                     attachment_urls, star_count, starboard_status,
-                    starboard_message_id, starboard_message_channel
+                    starboard_message_id, starboard_message_channel, forwarded, reply_message_id, reply_username
                 )
                 VALUES (
                     $1, $2, $3, $4, $5, $6,
-                    $7, $8, $9,
-                    $10, $11
+                    $7, $8, $9, $10, $11,
+                    $12, $13, $14
                 ) RETURNING id
                 "#,
             m.user_id.get() as i64,
@@ -490,6 +518,9 @@ impl Database {
             m.starboard_status as _,
             m.starboard_message_id.get() as i64,
             m.starboard_message_channel.get() as i64,
+            m.forwarded,
+            m.reply_message_id.map(|m| m.get() as i64),
+            m.reply_username
         )
         .fetch_one(&self.db)
         .await
@@ -542,7 +573,7 @@ impl Database {
     ) -> Result<StarboardMessage, sqlx::Error> {
         sqlx::query_as!(StarboardMessage,
         r#"
-        SELECT id, user_id, username, avatar_url, content, channel_id, message_id, attachment_urls, star_count, starboard_message_id, starboard_message_channel, starboard_status as "starboard_status: StarboardStatus"
+        SELECT id, user_id, username, avatar_url, content, channel_id, message_id, attachment_urls, star_count, starboard_message_id, starboard_message_channel, starboard_status as "starboard_status: StarboardStatus", reply_message_id, forwarded, reply_username
         FROM starboard
         WHERE starboard_message_id = $1
         "#, starboard_msg_id.get() as i64)
@@ -610,7 +641,7 @@ impl Database {
     pub async fn get_all_starboard(&self) -> Result<Vec<StarboardMessage>, Error> {
         let messages = sqlx::query_as!(StarboardMessage,
             r#"
-            SELECT id, user_id, username, avatar_url, content, channel_id, message_id, attachment_urls, star_count, starboard_message_id, starboard_message_channel, starboard_status as "starboard_status: StarboardStatus"
+            SELECT id, user_id, username, avatar_url, content, channel_id, message_id, attachment_urls, star_count, starboard_message_id, starboard_message_channel, starboard_status as "starboard_status: StarboardStatus", reply_message_id, forwarded, reply_username
             FROM starboard"#)
                 .fetch_all(&self.db)
                 .await?;
