@@ -3,6 +3,7 @@
 use std::borrow::Cow;
 
 use poise::serenity_prelude as serenity;
+use serenity::all::CollectComponentInteractions;
 
 // Modified version of the builtin poise function.
 pub fn create_application_commands<U, E>(
@@ -87,7 +88,7 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
         .message()
         .await?
         .id
-        .await_component_interaction(ctx.serenity_context().shard.clone())
+        .collect_component_interactions(ctx.serenity_context().shard.clone())
         .author_id(ctx.author().id)
         .await;
 

@@ -15,7 +15,7 @@ use moth_ansi::{CYAN, DIM, HI_BLACK, HI_RED, RESET};
 use database::{insert_deletion, insert_edit, insert_message};
 use poise::serenity_prelude::{
     self as serenity, ChannelId, Colour, CreateEmbed, CreateEmbedFooter, CreateMessage, GuildId,
-    Message, MessageId, MessageUpdateEvent, UserId,
+    Message, MessageId, UserId,
 };
 
 pub async fn message(ctx: &serenity::Context, msg: &Message, data: Arc<Data>) -> Result<(), Error> {
@@ -80,54 +80,50 @@ async fn maybe_names(
 pub async fn message_edit(
     ctx: &serenity::Context,
     old_if_available: &Option<Message>,
-    new: &Option<Message>,
-    event: &MessageUpdateEvent,
+    new_message: &Message,
     data: Arc<Data>,
 ) -> Result<(), Error> {
-    let guild_id = event.guild_id;
+    let guild_id = new_message.guild_id;
     let guild_name = get_guild_name_override(ctx, &data, guild_id);
-    let channel_name = get_channel_name(ctx, guild_id, event.channel_id).await;
+    let channel_name = get_channel_name(ctx, guild_id, new_message.channel_id).await;
 
     // I can probably just check event instead, it probably has what i need.
-    match (old_if_available, new) {
-        (Some(old_message), Some(new_message)) => {
-            if new_message.author.bot() {
-                return Ok(());
-            }
-
-            if old_message.content != new_message.content {
-                let (attachments, embeds) = attachments_embed_fmt(new_message);
-
-                println!(
-                    "{CYAN}[{}] [#{}] A message by {RESET}{}{CYAN} was edited:",
-                    guild_name,
-                    channel_name,
-                    new_message.author.tag()
-                );
-                println!(
-                    "BEFORE: {}: {}",
-                    new_message.author.tag(),
-                    old_message.content
-                ); // potentially check old attachments in the future.
-                println!(
-                    "AFTER: {}: {}{}{}{RESET}",
-                    new_message.author.tag(),
-                    new_message.content,
-                    attachments.as_deref().unwrap_or(""),
-                    embeds.as_deref().unwrap_or("")
-                );
-
-                let _ = insert_edit(&data.database, new_message).await;
-            }
+    if let Some(old_message) = old_if_available {
+        if new_message.author.bot() {
+            return Ok(());
         }
-        (None, None) => {
+
+        if old_message.content != new_message.content {
+            let (attachments, embeds) = attachments_embed_fmt(new_message);
+
             println!(
-                "{CYAN}A message (ID:{}) was edited but was not in cache{RESET}",
-                event.id
+                "{CYAN}[{}] [#{}] A message by {RESET}{}{CYAN} was edited:",
+                guild_name,
+                channel_name,
+                new_message.author.tag()
             );
+            println!(
+                "BEFORE: {}: {}",
+                new_message.author.tag(),
+                old_message.content
+            ); // potentially check old attachments in the future.
+            println!(
+                "AFTER: {}: {}{}{}{RESET}",
+                new_message.author.tag(),
+                new_message.content,
+                attachments.as_deref().unwrap_or(""),
+                embeds.as_deref().unwrap_or("")
+            );
+
+            let _ = insert_edit(&data.database, new_message).await;
         }
-        _ => {}
+    } else {
+        println!(
+            "{CYAN}A message (ID:{}) was edited but was not in cache{RESET}",
+            new_message.id
+        );
     }
+
     Ok(())
 }
 

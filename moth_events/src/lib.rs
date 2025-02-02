@@ -34,10 +34,9 @@ pub async fn event_handler(
         }
         FullEvent::MessageUpdate {
             old_if_available,
-            new,
             event,
         } => {
-            messages::message_edit(ctx, old_if_available, new, event, data).await?;
+            messages::message_edit(ctx, old_if_available, &event.message, data).await?;
         }
         FullEvent::MessageDelete {
             channel_id,
@@ -80,8 +79,11 @@ pub async fn event_handler(
         FullEvent::ChannelUpdate { old, new } => {
             channels::channel_update(ctx, data, old, new).await?;
         }
-        FullEvent::ThreadCreate { thread } => {
-            channels::thread_create(ctx, data, thread).await?;
+        FullEvent::ThreadCreate {
+            thread,
+            newly_created,
+        } => {
+            channels::thread_create(ctx, data, thread, newly_created).await?;
         }
         FullEvent::ThreadDelete {
             thread,

@@ -301,6 +301,7 @@ pub async fn thread_create(
     ctx: &serenity::Context,
     data: Arc<Data>,
     thread: &GuildChannel,
+    newly_created: &Option<bool>,
 ) -> Result<(), Error> {
     let guild_id = thread.guild_id;
     let guild_name = get_guild_name_override(ctx, &data, Some(guild_id));
@@ -312,10 +313,17 @@ pub async fn thread_create(
         "Unknown Channel".to_string()
     };
 
+    if let Some(newly_created) = newly_created {
+        if !newly_created {
+            return Ok(());
+        }
+    }
+
     println!(
         "{HI_BLUE}[{}] Thread #{} ({}) was created in #{}!{RESET}",
         guild_name, thread.name, kind, parent_channel_name
     );
+
     Ok(())
 }
 
