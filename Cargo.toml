@@ -42,11 +42,11 @@ rustrict = "0.7.33"
 regex = "1.11.1"
 
 [workspace.dependencies.serenity]
-git = "https://github.com/serenity-rs/serenity"
+git = "https://github.com/jamesbt365/serenity"
 #path = "../serenity"
 features = ["temp_cache"]
 default-features = false
-branch = "next"
+branch = "next-downgrade-tokio-tungstenite"
 
 
 [workspace.dependencies.poise]
@@ -57,6 +57,9 @@ branch = "compile"
 # patch for developing locally.
 #[patch."https://github.com/serenity-rs/serenity".serenity]
 #path = "../serenity"
+
+[patch.'https://github.com/serenity-rs/serenity']
+serenity = { git = 'https://github.com/jamesbt365/serenity', branch = 'next-downgrade-tokio-tungstenite' }
 
 
 [profile.release]
