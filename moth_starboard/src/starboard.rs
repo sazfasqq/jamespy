@@ -7,6 +7,7 @@ use moth_data::database::{
     UserIdWrapper,
 };
 use poise::serenity_prelude as serenity;
+use small_fixed_array::FixedString;
 use std::sync::Arc;
 
 pub async fn starboard_add_handler(
@@ -193,6 +194,33 @@ async fn new(
         return Ok(());
     }
 
+    let embeds = msg.embeds.iter().filter_map(|e| {
+        if e.kind == Some(FixedString::from_static_trunc("image")) {
+            if let Some(url) = &e.url {
+                let base_url = url
+                    .split_once('?')
+                    .map_or(url.to_string(), |a| a.0.to_string());
+                Some(base_url.to_string())
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    });
+
+    let attachment_urls = msg
+        .attachments
+        .iter()
+        .map(|a| {
+            a.url
+                .split_once('?')
+                .map_or_else(|| a.url.to_string(), |a| a.0.to_string())
+        })
+        .chain(embeds)
+        .take(10)
+        .collect();
+
     let mut starboard_msg = StarboardMessage {
         // gets corrected on insert.
         id: 0,
@@ -202,15 +230,7 @@ async fn new(
         content,
         channel_id: ChannelIdWrapper(msg.channel_id),
         message_id: MessageIdWrapper(msg.id),
-        attachment_urls: msg
-            .attachments
-            .iter()
-            .map(|a| {
-                a.url
-                    .split_once('?')
-                    .map_or_else(|| a.url.to_string(), |a| a.0.to_string())
-            })
-            .collect(),
+        attachment_urls,
         star_count,
         starboard_status: StarboardStatus::InReview,
         // gets corrected on insert.
