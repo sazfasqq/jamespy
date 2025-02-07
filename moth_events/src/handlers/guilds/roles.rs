@@ -88,14 +88,14 @@ pub(crate) async fn role_update(
         }
     }
 
-    if old_role.position != role.position {
+    /*     if old_role.position != role.position {
         writeln!(
             string,
             "position: {} -> {}",
             old_role.position, role.position
         )
         .unwrap();
-    }
+    } */
 
     // TODO: write some stuff for the RoleTags even though it'll hardly ever change.
 
@@ -145,7 +145,10 @@ pub(crate) async fn role_update(
         .unwrap();
     }
 
-    println!("{string}");
+    if !string.is_empty() {
+        string.strip_suffix('\n').unwrap_or(&string);
+        println!("{string}");
+    }
 
     Ok(())
 }

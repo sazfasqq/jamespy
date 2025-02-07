@@ -59,11 +59,17 @@ async fn log_role_change(
             return;
         }
 
-        let user_name = get_user(ctx, guild_id, entry.user_id.unwrap())
+        let mod_name = get_user(ctx, guild_id, entry.user_id.unwrap())
             .await
             .map_or(Cow::Borrowed("UNKNOWN_USER"), |u| {
                 Cow::Owned(u.name.to_string())
             });
+
+        let user_name = if let Some(target) = entry.target_id {
+            Some(get_username(ctx, guild_id, Some(UserId::new(target.get()))).await)
+        } else {
+            None
+        };
 
         if roles.len() > 1 {
             let mut names_array = Vec::new();
@@ -84,18 +90,31 @@ async fn log_role_change(
                     .join(", ")
             );
 
-            // TODO: list user that actually did the action too!
-            println!(
-                "{MAGENTA}[{guild_name}]: {user_name}: roles {action}: {names_string} \
-                 {roles_string}"
-            );
+            if let Some(user_name) = user_name {
+                println!(
+                    "{MAGENTA}[{guild_name}] {mod_name} {action} {user_name}'s roles: \
+                     {names_string} {roles_string}"
+                );
+            } else {
+                println!(
+                    "{MAGENTA}[{guild_name}] {mod_name} {action} their own roles: {names_string} \
+                     {roles_string}"
+                );
+            }
         } else {
             let role = roles.first().unwrap();
 
-            println!(
-                "{MAGENTA}[{guild_name}] {user_name}: role {action}: {} ({})",
-                role.name, role.id
-            );
+            if let Some(user_name) = user_name {
+                println!(
+                    "{MAGENTA}[{guild_name}] {mod_name} {action}: {} ({}) from {user_name}",
+                    role.name, role.id
+                );
+            } else {
+                println!(
+                    "{MAGENTA}[{guild_name}] {mod_name} {action} {} ({}) from themselves",
+                    role.name, role.id
+                );
+            }
         }
     }
 }
