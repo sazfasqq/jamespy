@@ -45,6 +45,7 @@ pub(crate) async fn role_update(
     role: &Role,
 ) -> Result<(), Error> {
     let guild_name = get_guild_name_override(ctx, &ctx.data(), Some(role.guild_id));
+    let mut modified = false;
 
     let Some(old_role) = old_role else {
         println!(
@@ -61,9 +62,12 @@ pub(crate) async fn role_update(
 
     if old_role.name != role.name {
         writeln!(string, "name: {} -> {}", old_role.name, role.name).unwrap();
+        modified = true;
     }
 
     if old_role.colour != role.colour {
+        modified = true;
+
         let old = moth_ansi::from_colour(old_role.colour.0);
         let new = moth_ansi::from_colour(role.colour.0);
 
@@ -100,10 +104,12 @@ pub(crate) async fn role_update(
     // TODO: write some stuff for the RoleTags even though it'll hardly ever change.
 
     if old_role.icon != role.icon {
+        modified = true;
         writeln!(string, "Icon has changed!").unwrap();
     }
 
     if old_role.unicode_emoji != role.unicode_emoji {
+        modified = true;
         let old = &old_role.unicode_emoji;
         let new = &role.unicode_emoji;
 
@@ -117,15 +123,18 @@ pub(crate) async fn role_update(
     }
 
     if old_role.permissions != role.permissions {
+        modified = true;
         let changes = permission_changes(old_role.permissions, role.permissions);
         writeln!(string, "{changes}").unwrap();
     };
 
     if old_role.hoist() != role.hoist() {
+        modified = true;
         writeln!(string, "hoisted: {} -> {}", old_role.hoist(), role.hoist()).unwrap();
     }
 
     if old_role.managed() != role.managed() {
+        modified = true;
         writeln!(
             string,
             "managed: {} -> {}",
@@ -136,6 +145,7 @@ pub(crate) async fn role_update(
     }
 
     if old_role.mentionable() != role.mentionable() {
+        modified = true;
         writeln!(
             string,
             "mentionable: {} -> {}",
@@ -145,7 +155,7 @@ pub(crate) async fn role_update(
         .unwrap();
     }
 
-    if !string.is_empty() {
+    if modified {
         string.strip_suffix('\n').unwrap_or(&string);
         println!("{string}");
     }
