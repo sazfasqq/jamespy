@@ -1781,6 +1781,9 @@ dependencies = [
 [[package]]
 name = "moth_ansi"
 version = "0.1.0"
+dependencies = [
+ "aformat",
+]
 
 [[package]]
 name = "moth_commands"

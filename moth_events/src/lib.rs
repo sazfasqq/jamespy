@@ -67,6 +67,28 @@ pub async fn event_handler(
         FullEvent::GuildAuditLogEntryCreate { entry, guild_id } => {
             guilds::guild_audit_log_entry_create(ctx, entry, guild_id).await?;
         }
+        FullEvent::GuildRoleCreate { new } => {
+            guilds::roles::role_create(ctx, new).await?;
+        }
+        FullEvent::GuildRoleDelete {
+            guild_id,
+            removed_role_id,
+            removed_role_data_if_available,
+        } => {
+            guilds::roles::role_delete(
+                ctx,
+                *guild_id,
+                *removed_role_id,
+                removed_role_data_if_available.as_ref(),
+            )
+            .await?;
+        }
+        FullEvent::GuildRoleUpdate {
+            old_data_if_available,
+            new,
+        } => {
+            guilds::roles::role_update(ctx, old_data_if_available.as_ref(), new).await?;
+        }
         FullEvent::ChannelCreate { channel } => {
             channels::channel_create(ctx, data, channel).await?;
         }

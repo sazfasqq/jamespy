@@ -1,5 +1,8 @@
 use std::sync::Arc;
 
+mod member_roles;
+pub(crate) mod roles;
+
 use crate::{
     helper::{get_channel_name, get_guild_name_override, get_user},
     Data, Error,
@@ -71,6 +74,8 @@ pub async fn guild_audit_log_entry_create(
     entry: &AuditLogEntry,
     guild_id: &GuildId,
 ) -> Result<(), Error> {
+    member_roles::handle(ctx, entry, *guild_id).await;
+
     if *guild_id != 98226572468690944 {
         return Ok(());
     }
@@ -121,24 +126,24 @@ pub async fn guild_audit_log_entry_create(
         )
         .to_string();
 
-        // TODO: fix silly.
         {
-            let msgs = ctx.cache.channel_messages(id.into());
-
-            if let Some(msgs) = msgs {
-                for msg in msgs.iter().rev() {
-                    if msg.author.id == entry.user_id.unwrap() {
-                        if let Some(kind) = &msg.embeds.first().and_then(|e| e.kind.clone()) {
-                            if kind == "auto_moderation_message" {
-                                if let Some(description) = &msg.embeds[0].description {
-                                    status = description.to_string();
-                                    break;
-                                }
-                            }
-                        }
+            if let Some(msgs) = ctx.cache.channel_messages(id.into()) {
+                for msg in msgs
+                    .iter()
+                    .rev()
+                    .filter(|m| m.author.id == entry.user_id.unwrap())
+                {
+                    if let Some(description) = msg
+                        .embeds
+                        .first()
+                        .filter(|e| e.kind.as_deref() == Some("auto_moderation_message"))
+                        .and_then(|e| e.description.as_ref())
+                    {
+                        status = description.to_string();
+                        break;
                     }
                 }
-            }
+            };
         };
 
         let author_title = format!("{user_name} tried to set an inappropriate status");
