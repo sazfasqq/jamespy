@@ -106,12 +106,12 @@ async fn log_role_change(
 
             if let Some(user_name) = user_name {
                 println!(
-                    "{MAGENTA}[{guild_name}] {mod_name} {action}: {} ({}) from {user_name}",
+                    "{MAGENTA}[{guild_name}] {mod_name} {action}: {} ({}) for {user_name}",
                     role.name, role.id
                 );
             } else {
                 println!(
-                    "{MAGENTA}[{guild_name}] {mod_name} {action} {} ({}) from themselves",
+                    "{MAGENTA}[{guild_name}] {mod_name} {action} {} ({}) for themselves",
                     role.name, role.id
                 );
             }

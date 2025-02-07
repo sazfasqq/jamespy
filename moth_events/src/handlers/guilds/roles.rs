@@ -61,7 +61,7 @@ pub(crate) async fn role_update(
     );
 
     if old_role.name != role.name {
-        writeln!(string, "name: {} -> {}", old_role.name, role.name).unwrap();
+        writeln!(string, "\nname: {} -> {}", old_role.name, role.name).unwrap();
         modified = true;
     }
 
@@ -74,18 +74,23 @@ pub(crate) async fn role_update(
         // Basically, its only none if there was no colour, so basically don't print if no colour?
         // kinda because... theres no point
         if let (Some(old_col), Some(new_col)) = (old, new) {
-            writeln!(
+            write!(
                 string,
-                "colour: #{old_col}{}{RESET} -> #{new_col}{}{RESET}",
+                "\ncolour: #{old_col}{}{RESET} -> #{new_col}{}{RESET}",
                 old_role.colour.0, role.colour.0
             )
             .unwrap();
         } else if let Some(new_col) = new {
-            writeln!(string, "colour: None -> #{new_col}{}{RESET}", role.colour.0).unwrap();
-        } else if let Some(old_col) = old {
-            writeln!(
+            write!(
                 string,
-                "colour: #{old_col}{}{RESET} -> None",
+                "\ncolour: None -> #{new_col}{}{RESET}",
+                role.colour.0
+            )
+            .unwrap();
+        } else if let Some(old_col) = old {
+            write!(
+                string,
+                "\ncolour: #{old_col}{}{RESET} -> None",
                 old_role.colour.0
             )
             .unwrap();
@@ -105,7 +110,7 @@ pub(crate) async fn role_update(
 
     if old_role.icon != role.icon {
         modified = true;
-        writeln!(string, "Icon has changed!").unwrap();
+        write!(string, "\nIcon has changed!").unwrap();
     }
 
     if old_role.unicode_emoji != role.unicode_emoji {
@@ -114,30 +119,36 @@ pub(crate) async fn role_update(
         let new = &role.unicode_emoji;
 
         if let (Some(old_emoji), Some(new_emoji)) = (old, new) {
-            writeln!(string, "Emoji changed: {old_emoji} -> {new_emoji}").unwrap();
+            write!(string, "\nEmoji changed: {old_emoji} -> {new_emoji}").unwrap();
         } else if let Some(new_emoji) = new {
-            writeln!(string, "emoji: None -> {new_emoji}").unwrap();
+            write!(string, "\nemoji: None -> {new_emoji}").unwrap();
         } else if let Some(old_emoji) = old {
-            writeln!(string, "old emoji: {old_emoji} -> None").unwrap();
+            write!(string, "\nold emoji: {old_emoji} -> None").unwrap();
         }
     }
 
     if old_role.permissions != role.permissions {
         modified = true;
         let changes = permission_changes(old_role.permissions, role.permissions);
-        writeln!(string, "{changes}").unwrap();
+        write!(string, "\n{changes}").unwrap();
     };
 
     if old_role.hoist() != role.hoist() {
         modified = true;
-        writeln!(string, "hoisted: {} -> {}", old_role.hoist(), role.hoist()).unwrap();
+        write!(
+            string,
+            "\nhoisted: {} -> {}",
+            old_role.hoist(),
+            role.hoist()
+        )
+        .unwrap();
     }
 
     if old_role.managed() != role.managed() {
         modified = true;
-        writeln!(
+        write!(
             string,
-            "managed: {} -> {}",
+            "\nmanaged: {} -> {}",
             old_role.managed(),
             role.managed()
         )
@@ -146,9 +157,9 @@ pub(crate) async fn role_update(
 
     if old_role.mentionable() != role.mentionable() {
         modified = true;
-        writeln!(
+        write!(
             string,
-            "mentionable: {} -> {}",
+            "\nmentionable: {} -> {}",
             old_role.mentionable(),
             role.mentionable()
         )
