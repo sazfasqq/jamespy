@@ -6,7 +6,14 @@ use poise::serenity_prelude::{self as serenity, UserId};
 use itertools::Itertools;
 use std::fmt::Write;
 
-#[poise::command(prefix_command, hide_in_help, guild_only, check = "allowed_user")]
+#[poise::command(
+    prefix_command,
+    hide_in_help,
+    guild_only,
+    check = "allowed_user",
+    rename = "list-queued",
+    aliases("list_queued")
+)]
 pub async fn list_queued(ctx: Context<'_>) -> Result<(), Error> {
     let sorted_starboard = ctx
         .data()
