@@ -1,10 +1,41 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, time::Duration};
 
 use crate::{Error, PrefixContext};
 
 use moth_events::handlers::messages::invites::INVITE;
 use poise::serenity_prelude as serenity;
+use serenity::all::MessageId;
 use small_fixed_array::FixedString;
+
+/// Purge messages in a channel.
+#[poise::command(
+    rename = "purge-in",
+    prefix_command,
+    category = "Moderation - Purge",
+    required_permissions = "MANAGE_MESSAGES",
+    required_bot_permissions = "MANAGE_MESSAGES | VIEW_CHANNEL | READ_MESSAGE_HISTORY",
+    hide_in_help
+)]
+pub async fn purge_in(
+    ctx: PrefixContext<'_>,
+    seconds: u16,
+    limit: u8,
+    command: Option<PurgeArgs>,
+) -> Result<(), Error> {
+    if seconds > 300 {
+        reaction_or_msg(ctx, "Cannot wait more than 5 minutes to purge.", "❌").await;
+    }
+
+    match purge_prep(ctx, limit, command).await? {
+        Some(messages) => {
+            tokio::time::sleep(Duration::from_secs(seconds.into())).await;
+            delete_messages(&ctx, messages).await?;
+        }
+        None => return Ok(()),
+    }
+
+    Ok(())
+}
 
 /// Purge messages in a channel.
 #[poise::command(
@@ -19,7 +50,21 @@ pub async fn purge(
     limit: u8,
     command: Option<PurgeArgs>,
 ) -> Result<(), Error> {
-    println!("{command:?}");
+    match purge_prep(ctx, limit, command).await? {
+        Some(messages) => {
+            delete_messages(&ctx, messages).await?;
+        }
+        None => return Ok(()),
+    }
+
+    Ok(())
+}
+
+async fn purge_prep(
+    ctx: PrefixContext<'_>,
+    limit: u8,
+    command: Option<PurgeArgs>,
+) -> Result<Option<HashSet<MessageId>>, Error> {
     if ctx.author().id.get() != 158567567487795200 {
         msg_or_reaction(
             ctx,
@@ -27,12 +72,12 @@ pub async fn purge(
             "❌",
         )
         .await;
-        return Ok(());
+        return Ok(None);
     }
 
     if !(2..=100).contains(&limit) {
         reaction_or_msg(ctx, "Can't purge 1 or more than 100 messages.", "❓").await;
-        return Ok(());
+        return Ok(None);
     }
 
     let messages = ctx
@@ -45,18 +90,12 @@ pub async fn purge(
 
     let mut deleted = HashSet::new();
 
-    let reason = &format!("Purged by {} (ID:{})", ctx.author().name, ctx.author().id);
-
     let Some(command) = command else {
-        ctx.channel_id()
-            .delete_messages(
-                ctx.http(),
-                &messages.iter().map(|m| m.id).collect::<Vec<_>>(),
-                Some(reason),
-            )
-            .await?;
+        for message in messages {
+            deleted.insert(message.id);
+        }
 
-        return Ok(());
+        return Ok(Some(deleted));
     };
 
     for group in dbg!(command.0) {
@@ -64,7 +103,7 @@ pub async fn purge(
             Modifier::User => {
                 let Some(user) = serenity::parse_user_mention(&group.content) else {
                     reaction_or_msg(ctx, "Cannot parse users.", "❓").await;
-                    return Ok(());
+                    return Ok(None);
                 };
 
                 for msg in &messages {
@@ -134,6 +173,15 @@ pub async fn purge(
             }
         }
     }
+
+    Ok(Some(deleted))
+}
+
+async fn delete_messages(
+    ctx: &PrefixContext<'_>,
+    mut deleted: HashSet<MessageId>,
+) -> Result<(), Error> {
+    let reason = &format!("Purged by {} (ID:{})", ctx.author().name, ctx.author().id);
 
     if deleted.len() > 99 {
         let _ = ctx.msg.delete(ctx.http(), Some(reason)).await;
@@ -370,6 +418,6 @@ fn has_permissions(ctx: &PrefixContext) -> (bool, bool) {
 }
 
 #[must_use]
-pub fn commands() -> [crate::Command; 1] {
-    [purge()]
+pub fn commands() -> [crate::Command; 2] {
+    [purge(), purge_in()]
 }
