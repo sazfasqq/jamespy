@@ -11,7 +11,7 @@ use std::{
     env,
 };
 
-use crate::structs::{DmActivity, Error, Names};
+use crate::structs::{DmActivity, Error};
 
 use poise::serenity_prelude as serenity;
 
@@ -122,7 +122,6 @@ pub async fn init_data() -> Database {
         banned_users,
         starboard: Mutex::new(StarboardHandler::default()),
         dm_activity: DashMap::new(),
-        names: parking_lot::Mutex::new(Names::new()),
     }
 }
 
@@ -150,7 +149,6 @@ pub struct Database {
 
     /// Runtime caches for dm activity.
     pub(crate) dm_activity: DashMap<UserId, DmActivity>,
-    pub(crate) names: parking_lot::Mutex<Names>,
 }
 
 #[derive(Default, Debug)]

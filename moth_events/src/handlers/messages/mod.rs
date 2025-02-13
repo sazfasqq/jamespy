@@ -53,8 +53,6 @@ pub async fn message(ctx: &serenity::Context, msg: &Message, data: Arc<Data>) ->
 
     let guild_name = get_guild_name(ctx, guild_id);
     let _ = tokio::join!(
-        data.check_or_insert_user(&msg.author),
-        maybe_names(&data, msg.author.id, msg.guild_id, msg.member.as_ref()),
         check_event_dm_regex(ctx, msg, &guild_name, patterns.as_deref()),
         handle_dm(ctx, msg),
         insert_message(&data.database, msg),
@@ -62,19 +60,6 @@ pub async fn message(ctx: &serenity::Context, msg: &Message, data: Arc<Data>) ->
     );
 
     Ok(())
-}
-
-async fn maybe_names(
-    data: &Data,
-    author_id: UserId,
-    guild_id: Option<GuildId>,
-    member: Option<&std::boxed::Box<serenity::PartialMember>>,
-) {
-    if let (Some(id), Some(member)) = (guild_id, member) {
-        if let Some(nick) = member.nick.as_ref().map(std::string::ToString::to_string) {
-            data.check_or_insert_nick(id, author_id, Some(nick)).await;
-        }
-    }
 }
 
 pub async fn message_edit(

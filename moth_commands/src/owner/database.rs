@@ -20,11 +20,6 @@ pub async fn dbstats(ctx: Context<'_>) -> Result<(), Error> {
         ("message_edits", "message_id"),
         ("message_deletion", "message_id"),
     ];
-    let names_tables = [
-        ("usernames", "user_id"),
-        ("global_names", "user_id"),
-        ("nicknames", "user_id"),
-    ];
 
     let expressions = [
         ("stickers", "sticker_id"),
@@ -36,9 +31,8 @@ pub async fn dbstats(ctx: Context<'_>) -> Result<(), Error> {
 
     let mut embed = serenity::CreateEmbed::default().title("Database Stats");
 
-    let (Ok(messages_info), Ok(names_info), Ok(expressions_info), Ok(misc_info)) = tokio::join!(
+    let (Ok(messages_info), Ok(expressions_info), Ok(misc_info)) = tokio::join!(
         query_table_info(db_pool, &messages_tables),
-        query_table_info(db_pool, &names_tables),
         query_table_info(db_pool, &expressions),
         query_table_info(db_pool, &misc_tables),
     ) else {
@@ -47,7 +41,6 @@ pub async fn dbstats(ctx: Context<'_>) -> Result<(), Error> {
     };
 
     embed = embed.field("Messages", messages_info, true);
-    embed = embed.field("Names", names_info, true);
     embed = embed.field("Names", expressions_info, true);
     embed = embed.field("Miscellaneous", misc_info, true);
 
@@ -77,34 +70,6 @@ async fn query_table_info(
     }
 
     Ok(info)
-}
-
-/// Inserts all users in the current guild into the names cache.
-#[poise::command(
-    rename = "insert-all-names",
-    prefix_command,
-    category = "Owner - Database",
-    owners_only,
-    guild_only,
-    hide_in_help
-)]
-pub async fn insert_all_users(ctx: Context<'_>) -> Result<(), Error> {
-    let guild_id = ctx.guild_id().unwrap();
-    // expensive, maybe find a better way.
-    let members = {
-        let guild = ctx.cache().guild(guild_id).unwrap();
-        guild.members.clone()
-    };
-    // this is not efficient in the slightest and locks the data several thousand times for massive guilds.
-    // I should really provide a better way of doing this in bulk.
-    for member in members {
-        ctx.data().check_or_insert_user(&member.user).await;
-        ctx.data()
-            .check_or_insert_nick(guild_id, member.user.id, member.nick.map(|s| s.to_string()))
-            .await;
-    }
-
-    Ok(())
 }
 
 #[poise::command(
@@ -162,6 +127,6 @@ pub async fn sql(
 }
 
 #[must_use]
-pub fn commands() -> [crate::Command; 3] {
-    [dbstats(), insert_all_users(), sql()]
+pub fn commands() -> [crate::Command; 2] {
+    [dbstats(), sql()]
 }
