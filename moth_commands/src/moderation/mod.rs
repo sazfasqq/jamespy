@@ -45,16 +45,14 @@ pub async fn purge(
 
     let mut deleted = HashSet::new();
 
+    let reason = &format!("Purged by {} (ID:{})", ctx.author().name, ctx.author().id);
+
     let Some(command) = command else {
         ctx.channel_id()
             .delete_messages(
                 ctx.http(),
                 &messages.iter().map(|m| m.id).collect::<Vec<_>>(),
-                Some(&format!(
-                    "Purged by {} (ID:{})",
-                    ctx.author().name,
-                    ctx.author().id
-                )),
+                Some(reason),
             )
             .await?;
 
@@ -135,6 +133,12 @@ pub async fn purge(
                 }
             }
         }
+    }
+
+    if deleted.len() > 99 {
+        let _ = ctx.msg.delete(ctx.http(), Some(reason)).await;
+    } else {
+        deleted.insert(ctx.msg.id);
     }
 
     ctx.channel_id()
