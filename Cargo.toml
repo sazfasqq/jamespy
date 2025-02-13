@@ -42,11 +42,11 @@ rustrict = "0.7.33"
 regex = "1.11.1"
 
 [workspace.dependencies.serenity]
-git = "https://github.com/jamesbt365/serenity"
+git = "https://github.com/serenity-rs/serenity"
 #path = "../serenity"
 features = ["temp_cache"]
 default-features = false
-branch = "next-downgrade-tokio-tungstenite"
+branch = "next"
 
 
 [workspace.dependencies.poise]
@@ -58,8 +58,8 @@ branch = "compile"
 #[patch."https://github.com/serenity-rs/serenity".serenity]
 #path = "../serenity"
 
-[patch.'https://github.com/serenity-rs/serenity']
-serenity = { git = 'https://github.com/jamesbt365/serenity', branch = 'next-downgrade-tokio-tungstenite' }
+#[patch.'https://github.com/serenity-rs/serenity']
+#serenity = { git = 'https://github.com/jamesbt365/serenity', branch = 'next-downgrade-tokio-tungstenite' }
 
 
 [profile.release]
