@@ -16,6 +16,7 @@ async fn main() {
         commands: moth_commands::commands(),
         prefix_options: poise::PrefixFrameworkOptions {
             prefix: Some("-".into()),
+            additional_prefixes: vec![poise::Prefix::Literal("m!"), poise::Prefix::Literal("m")],
             edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
                 Duration::from_secs(600),
             ))),

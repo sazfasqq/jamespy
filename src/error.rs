@@ -56,6 +56,7 @@ pub async fn handler(error: poise::FrameworkError<'_, Data, Error>) {
             // all cooldowns (framework and manual) should go to the same route.
             let _ = handle_cooldown(remaining_cooldown, ctx).await;
         }
+        poise::FrameworkError::UnknownCommand { .. } => {}
         error => {
             if let Err(e) = poise::builtins::on_error(error).await {
                 println!("Error while handling error: {e}");
