@@ -2,10 +2,7 @@ use ::serenity::all::{ChannelId, MessageId};
 use dashmap::{DashMap, DashSet};
 use parking_lot::Mutex;
 use serenity::all::UserId;
-use sqlx::{
-    postgres::{PgHasArrayType, PgPoolOptions, PgTypeInfo},
-    query, Executor, PgPool,
-};
+use sqlx::{postgres::PgPoolOptions, query, Executor, PgPool};
 use std::{
     collections::{HashMap, HashSet},
     env,
@@ -134,12 +131,6 @@ pub enum EmoteUsageType {
     ReactionRemove,
 }
 
-impl PgHasArrayType for EmoteUsageType {
-    fn array_type_info() -> PgTypeInfo {
-        PgTypeInfo::with_name("emoteusagetype[]")
-    }
-}
-
 pub struct Database {
     pub db: PgPool,
     banned_users: DashSet<UserId>,
@@ -192,12 +183,6 @@ pub enum StarboardStatus {
     InReview,
     Accepted,
     Denied,
-}
-
-impl PgHasArrayType for StarboardStatus {
-    fn array_type_info() -> PgTypeInfo {
-        PgTypeInfo::with_name("starboard_status[]")
-    }
 }
 
 impl Database {

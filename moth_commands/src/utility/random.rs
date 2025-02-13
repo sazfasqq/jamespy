@@ -1,6 +1,5 @@
 use crate::{Context, Error};
 use poise::serenity_prelude::{self as serenity, Colour, CreateEmbedAuthor};
-use rand::rngs::OsRng;
 use rand::RngCore;
 
 #[allow(clippy::too_many_arguments)]
@@ -35,16 +34,19 @@ pub async fn choose(
 
     choices.extend(optional_choices.into_iter().flatten());
 
-    let author = ctx.author();
-    let mut rng = OsRng;
-    let random_index = rng.next_u32() as usize % choices.len();
-    let chosen_option = &choices[random_index];
+    let author: &serenity::User = ctx.author();
+
+    let chosen_option = {
+        let mut rng = rand::rng();
+        let random_index = rng.next_u32() as usize % choices.len();
+        &choices[random_index]
+    };
 
     ctx.send(
         poise::CreateReply::default().embed(
             serenity::CreateEmbed::default()
                 .author(CreateEmbedAuthor::new(author.tag()).icon_url(author.face()))
-                .description(chosen_option.to_string())
+                .description(chosen_option)
                 .color(Colour::from_rgb(0, 255, 0)),
         ),
     )

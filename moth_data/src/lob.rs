@@ -22,7 +22,7 @@ fn get_loblist() -> &'static RwLock<HashSet<String>> {
 pub fn get_random_lob() -> Option<String> {
     let loblist = get_loblist().read().unwrap();
 
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     loblist.iter().choose(&mut rng).cloned()
 }
 

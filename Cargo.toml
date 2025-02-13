@@ -26,13 +26,13 @@ members = [ "moth_config", "moth_data", "moth_events", "moth_config", "moth_comm
 
 [workspace.dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "signal", "parking_lot"] }
-sqlx = { version = "0.7", features = ["macros", "postgres", "runtime-tokio-rustls", "chrono"] }
+sqlx = { version = "0.8", features = ["macros", "postgres", "runtime-tokio-rustls", "chrono"] }
 reqwest = "0.12"
-rand = "0.8"
+rand = "0.9"
 small-fixed-array = { version = "0.4.5", features = ["nightly"] }
 chrono = "0.4"
 parking_lot = "0.12.1"
-dashmap = "5.5.3"
+dashmap = "6"
 unicode_names2 = "1.2.2"
 image = "0.25.2"
 unicode-segmentation = "1.12.0"

@@ -24,7 +24,7 @@ rand = { workspace = true }
 tracing = { workspace = true }
 
 libc = "0.2.152"
-sysinfo = "0.30.5"
+sysinfo = "0.33"
 url = "2.5.0"
 serde = "1.0"
 serde_json = "1.0"
