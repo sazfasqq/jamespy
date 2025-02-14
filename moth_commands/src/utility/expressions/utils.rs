@@ -2,10 +2,10 @@ use aformat::{aformat, ToArrayString};
 use std::{borrow::Cow, fmt::Write};
 
 use crate::{Context, Error};
-use poise::{CreateReply, PrefixContext};
+use poise::CreateReply;
 use serenity::all::{
     ComponentInteractionCollector, CreateActionRow, CreateButton, CreateEmbed, CreateEmbedFooter,
-    CreateInteractionResponse, CreateInteractionResponseMessage, EmojiId, Permissions,
+    CreateInteractionResponse, CreateInteractionResponseMessage, EmojiId,
 };
 
 use super::{Expression, ExpressionCounts};
@@ -177,7 +177,7 @@ pub(super) async fn check_in_guild(
             .unwrap()
             .permissions
             .unwrap(),
-        poise::Context::Prefix(ctx) => prefix_member_perms(ctx).await?,
+        poise::Context::Prefix(ctx) => crate::utils::prefix_member_perms(ctx).await?,
     };
 
     if permissions.manage_messages() {
@@ -211,28 +211,4 @@ pub(super) async fn check_in_guild(
     };
 
     Ok(present)
-}
-
-async fn prefix_member_perms(
-    ctx: PrefixContext<'_, crate::Data, Error>,
-) -> Result<Permissions, Error> {
-    let Some(guild) = ctx.guild() else {
-        return Err("Could not retrieve guild from cache.".into());
-    };
-
-    let channel_id = ctx.channel_id();
-    let channel = guild
-        .channels
-        .get(&channel_id)
-        .or_else(|| guild.threads.iter().find(|c| c.id == channel_id))
-        .expect("Channels or threads are always sent alongside the guild.");
-
-    Ok(guild.partial_member_permissions_in(
-        channel,
-        ctx.author().id,
-        ctx.msg
-            .member
-            .as_ref()
-            .expect("PartialMember is always present on a message from a guild."),
-    ))
 }
