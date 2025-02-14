@@ -1,8 +1,8 @@
 use std::time::Duration;
 
 use crate::{Context, Error};
-use moth_data::lob::*;
-use moth_data::structs::InvocationData;
+use moth_core::data::lob::*;
+use moth_core::data::structs::InvocationData;
 use poise::serenity_prelude::{self as serenity, UserId};
 
 /// i lob

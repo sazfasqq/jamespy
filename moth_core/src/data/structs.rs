@@ -18,11 +18,11 @@ pub struct Data {
     /// Time the bot started.
     pub time_started: std::time::Instant,
     /// Wrapper for the bots database with helper functions.
-    pub database: crate::database::Database,
+    pub database: crate::data::database::Database,
     /// Http client.
     pub reqwest: reqwest::Client,
     /// Bot/Server Configuration
-    pub config: RwLock<moth_config::MothConfig>,
+    pub config: RwLock<crate::config::MothConfig>,
     /// Experimental anti mass message deletion tracking.
     pub anti_delete_cache: AntiDeleteCache,
     pub starboard_config: StarboardConfig,

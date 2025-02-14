@@ -1,6 +1,6 @@
 use ::serenity::{all::CreateAllowedMentions, small_fixed_array::FixedString};
 use moth_commands::utils::{handle_cooldown, prefix_bot_perms};
-use moth_data::structs::{Context, Data, Error, InvocationData};
+use moth_core::data::structs::{Context, Data, Error, InvocationData};
 use poise::serenity_prelude as serenity;
 
 async fn handle_command_error(ctx: Context<'_>, error: Error) {

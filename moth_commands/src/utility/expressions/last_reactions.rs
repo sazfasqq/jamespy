@@ -1,5 +1,5 @@
 use crate::{Context, Error};
-use moth_data::database::EmoteUsageType;
+use moth_core::data::database::EmoteUsageType;
 use poise::serenity_prelude::MessageId;
 use sqlx::query_as;
 
@@ -75,7 +75,7 @@ pub struct LastReactionEntry {
 // TODO: dedupe this shit lmao
 async fn query_last_reactions(
     ctx: Context<'_>,
-    database: &moth_data::database::Database,
+    database: &moth_core::data::database::Database,
     search_context: SearchContext,
     emoji: Option<Expression<'_>>,
 ) -> Result<Vec<LastReactionEntry>, Error> {

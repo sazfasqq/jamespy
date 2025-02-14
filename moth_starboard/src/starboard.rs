@@ -2,7 +2,7 @@ use crate::{
     Data, Error,
     reactions::{get_reaction_count, get_unique_reaction_count},
 };
-use moth_data::database::{
+use moth_core::data::database::{
     ChannelIdWrapper, MaybeMessageIdWrapper, MessageIdWrapper, StarboardMessage, StarboardStatus,
     UserIdWrapper,
 };

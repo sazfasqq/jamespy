@@ -4,7 +4,7 @@ pub mod pagination;
 use std::time::Duration;
 
 pub use checks::*;
-use moth_data::structs::{Context, Error};
+use moth_core::data::structs::{Context, Error};
 pub use pagination::*;
 use poise::CreateReply;
 

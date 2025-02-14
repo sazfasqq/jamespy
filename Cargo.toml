@@ -4,9 +4,8 @@ version = "0.3.0"
 edition = "2021"
 
 [dependencies]
-moth_data = { path = "moth_data" }
+moth_core = { path = "moth_core" }
 moth_events = { path = "moth_events" }
-moth_config = { path = "moth_config" }
 moth_commands = { path = "moth_commands" }
 
 sqlx = { workspace = true }
@@ -22,7 +21,7 @@ dotenvy = "0.15.7"
 
 
 [workspace]
-members = [ "moth_config", "moth_data", "moth_events", "moth_config", "moth_commands", "moth_filter", "moth_ansi", "moth_starboard"]
+members = [ "moth_core", "moth_events", "moth_commands", "moth_filter", "moth_ansi", "moth_starboard"]
 
 [workspace.dependencies]
 tokio = { version = "1", features = ["rt-multi-thread", "signal", "parking_lot"] }
@@ -40,6 +39,8 @@ emojis = "0.6.4"
 tracing = "0.1.40"
 rustrict = "0.7.33"
 regex = "1.11.1"
+serde = "1"
+serde_json = "1"
 
 [workspace.dependencies.serenity]
 git = "https://github.com/serenity-rs/serenity"

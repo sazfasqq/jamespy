@@ -1,6 +1,6 @@
 use std::sync::{Arc, LazyLock};
 
-use moth_data::structs::Data;
+use moth_core::data::structs::Data;
 use poise::serenity_prelude::{self as serenity, ChannelId, CreateMessage, GuildId, Message};
 use regex::Regex;
 

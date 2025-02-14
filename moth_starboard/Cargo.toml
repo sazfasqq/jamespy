@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-moth_data = { path = "../moth_data" }
+moth_core = { path = "../moth_core" }
 poise.workspace = true
 regex.workspace = true
 serenity.workspace = true

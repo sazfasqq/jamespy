@@ -6,7 +6,7 @@ mod last_reactions_paginator;
 mod query;
 mod utils;
 
-use moth_data::database::EmoteUsageType;
+use moth_core::data::database::EmoteUsageType;
 use moth_events::handlers::messages::EMOJI_REGEX;
 use query::handle_expression_query;
 

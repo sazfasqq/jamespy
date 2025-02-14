@@ -2,7 +2,7 @@ use std::{str::FromStr, sync::Arc};
 
 use crate::{Data, Error};
 use ::serenity::all::{CreateInteractionResponseMessage, UserId};
-use moth_data::database::StarboardStatus;
+use moth_core::data::database::StarboardStatus;
 use poise::serenity_prelude as serenity;
 
 use super::starboard::starboard_message;

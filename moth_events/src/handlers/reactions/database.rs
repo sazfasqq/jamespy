@@ -4,7 +4,7 @@ use sqlx::query;
 
 use crate::Error;
 
-use moth_data::database::{Database, EmoteUsageType};
+use moth_core::data::database::{Database, EmoteUsageType};
 
 async fn insert_emote_usage(
     database: &Database,

@@ -6,9 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-moth_data = { path = "../moth_data" }
+moth_core = { path = "../moth_core" }
 moth_events = { path = "../moth_events" }
-moth_config = { path = "../moth_config" }
 moth_ansi = { path = "../moth_ansi" }
 moth_filter = { path = "../moth_filter" }
 

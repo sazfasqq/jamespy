@@ -1,5 +1,5 @@
 #![warn(clippy::pedantic)]
-// clippy warns for u64 -> i64 conversions despite this being totally okay in this scenario.
+// clippy warns for casting, but as i cast data into the database and out its fine.
 #![allow(
     clippy::missing_errors_doc,
     clippy::missing_panics_doc,
@@ -9,6 +9,5 @@
     clippy::cast_sign_loss
 )]
 
-pub mod database;
-pub mod lob;
-pub mod structs;
+pub mod config;
+pub mod data;

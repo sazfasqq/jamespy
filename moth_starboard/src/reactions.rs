@@ -1,5 +1,5 @@
 use crate::{Data, Error};
-use moth_data::database::StarboardMessage;
+use moth_core::data::database::StarboardMessage;
 use poise::serenity_prelude::{self as serenity, ChannelId, MessageId, Reaction, UserId};
 use small_fixed_array::FixedString;
 use std::collections::hash_map::Entry;

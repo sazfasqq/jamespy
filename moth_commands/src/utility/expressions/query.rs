@@ -1,6 +1,6 @@
 use super::{Expression, ExpressionCounts};
 use crate::Error;
-use moth_data::database::{Database, EmoteUsageType};
+use moth_core::data::database::{Database, EmoteUsageType};
 use serenity::all::GuildId;
 use sqlx::query_as;
 

@@ -1,11 +1,11 @@
-use moth_data::structs::{Data, StarboardConfig};
+use moth_core::data::structs::{Data, StarboardConfig};
 use serenity::all::{ChannelId, GuildId};
 use std::sync::{atomic::AtomicBool, Arc};
 
 pub async fn setup() -> Arc<Data> {
-    let handler = moth_data::database::init_data().await;
+    let handler = moth_core::data::database::init_data().await;
 
-    let config = moth_config::MothConfig::load_config();
+    let config = moth_core::config::MothConfig::load_config();
     let starboard_config = starboard_config();
 
     Arc::new(Data {
@@ -14,7 +14,7 @@ pub async fn setup() -> Arc<Data> {
         time_started: std::time::Instant::now(),
         reqwest: reqwest::Client::new(),
         config: parking_lot::RwLock::new(config),
-        anti_delete_cache: moth_data::structs::AntiDeleteCache::default(),
+        anti_delete_cache: moth_core::data::structs::AntiDeleteCache::default(),
         starboard_config,
     })
 }

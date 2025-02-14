@@ -6,7 +6,7 @@ use sqlx::query;
 use unicode_segmentation::UnicodeSegmentation;
 
 use crate::Error;
-use moth_data::database::{Database, EmoteUsageType};
+use moth_core::data::database::{Database, EmoteUsageType};
 use poise::serenity_prelude::Message;
 
 pub static EMOJI_REGEX: LazyLock<Regex> =

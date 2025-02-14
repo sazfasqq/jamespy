@@ -2,13 +2,13 @@ use ::serenity::all::{ChannelId, MessageId};
 use dashmap::{DashMap, DashSet};
 use parking_lot::Mutex;
 use serenity::all::UserId;
-use sqlx::{postgres::PgPoolOptions, query, Executor, PgPool};
+use sqlx::{Executor, PgPool, postgres::PgPoolOptions, query};
 use std::{
     collections::{HashMap, HashSet},
     env,
 };
 
-use crate::structs::{DmActivity, Error};
+use crate::data::structs::{DmActivity, Error};
 
 use poise::serenity_prelude as serenity;
 

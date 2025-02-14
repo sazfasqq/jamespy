@@ -1,6 +1,6 @@
 use crate::{Context, Error};
 
-use moth_data::database::StarboardStatus;
+use moth_core::data::database::StarboardStatus;
 use poise::serenity_prelude::{self as serenity, UserId};
 
 use itertools::Itertools;

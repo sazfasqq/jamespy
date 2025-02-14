@@ -4,7 +4,7 @@ use std::io::{BufRead, BufReader, Write};
 
 use std::sync::{OnceLock, RwLock};
 
-use crate::structs::{Context, Error};
+use crate::data::structs::{Context, Error};
 use rand::seq::IteratorRandom;
 
 pub const LOB_PATH: &str = "config/lists/loblist.txt";

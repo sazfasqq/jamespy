@@ -1,11 +1,9 @@
 [package]
-name = "moth_data"
-version = "0.3.0"
-edition = "2021"
+name = "moth_core"
+version = "0.1.0"
+edition = "2024"
 
 [dependencies]
-moth_config = {path = "../moth_config" }
-
 sqlx = { workspace = true }
 tokio = { workspace = true }
 poise = { workspace = true }
@@ -17,3 +15,7 @@ parking_lot = { workspace = true }
 dashmap = { workspace = true}
 tracing = { workspace = true }
 rustrict.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+regex.workspace = true
+base64 = "0.22"
