@@ -6,8 +6,10 @@
     clippy::module_name_repetitions,
     clippy::unreadable_literal,
     clippy::cast_possible_wrap,
-    clippy::cast_sign_loss
+    clippy::cast_sign_loss,
+    clippy::cast_possible_truncation
 )]
 
 pub mod config;
 pub mod data;
+pub mod ocr;

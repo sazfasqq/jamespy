@@ -1,4 +1,4 @@
-use crate::{owner::owner, Context, Error};
+use crate::{moderation::msg_or_reaction, owner::owner, Context, Error};
 use futures::StreamExt;
 
 use ::serenity::all::{collect, Event, GuildId};
@@ -195,7 +195,26 @@ async fn chunk_and_wait(ctx: Context<'_>, guild_id: GuildId) -> bool {
     false
 }
 
+#[poise::command(
+    rename = "invalidate-response-cache",
+    prefix_command,
+    category = "Owner - Cache",
+    hide_in_help,
+    check = "owner"
+)]
+pub async fn invalidate_response_cache(ctx: crate::PrefixContext<'_>) -> Result<(), Error> {
+    ctx.data().database.invalidate_response_cache();
+    msg_or_reaction(ctx, "Done!", "✅").await;
+
+    Ok(())
+}
+
 #[must_use]
-pub fn commands() -> [crate::Command; 3] {
-    [max_messages(), guild_cache_stats(), guild_user_cache()]
+pub fn commands() -> [crate::Command; 4] {
+    [
+        max_messages(),
+        guild_cache_stats(),
+        guild_user_cache(),
+        invalidate_response_cache(),
+    ]
 }

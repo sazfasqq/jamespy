@@ -353,11 +353,11 @@ fn flush(
     *current_content = Vec::new();
 }
 
-async fn reaction_or_msg(ctx: PrefixContext<'_>, msg: &str, reaction: &str) {
+pub async fn reaction_or_msg(ctx: PrefixContext<'_>, msg: &str, reaction: &str) {
     message_react(ctx, true, msg, reaction).await;
 }
 
-async fn msg_or_reaction(ctx: PrefixContext<'_>, msg: &str, reaction: &str) {
+pub async fn msg_or_reaction(ctx: PrefixContext<'_>, msg: &str, reaction: &str) {
     message_react(ctx, false, msg, reaction).await;
 }
 

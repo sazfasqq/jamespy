@@ -19,3 +19,5 @@ serde.workspace = true
 serde_json.workspace = true
 regex.workspace = true
 base64 = "0.22"
+leptess.workspace = true
+bitflags = "2.8.0"

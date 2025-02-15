@@ -6,6 +6,7 @@ mod database;
 pub use database::EMOJI_REGEX;
 use invites::moderate_invites;
 pub mod invites;
+mod responses;
 
 use crate::helper::{get_channel_name, get_guild_name, get_guild_name_override};
 use crate::{Data, Error};
@@ -19,6 +20,22 @@ use poise::serenity_prelude::{
 };
 
 pub async fn message(ctx: &serenity::Context, msg: &Message, data: Arc<Data>) -> Result<(), Error> {
+    if msg.channel_id.get() == 1340010066442715227 {
+        if let Some(attachment) = msg.attachments.first() {
+            if let Ok(image_data) = attachment.download().await {
+                let text = data.ocr_engine.process(image_data).await;
+
+                let _ = msg
+                    .channel_id
+                    .say(
+                        &ctx.http,
+                        text.unwrap_or("failed to find text in media.".to_owned()),
+                    )
+                    .await;
+            }
+        }
+    }
+
     let (content, patterns) = {
         let config = &data.config.read().events;
 
@@ -57,6 +74,7 @@ pub async fn message(ctx: &serenity::Context, msg: &Message, data: Arc<Data>) ->
         handle_dm(ctx, msg),
         insert_message(&data.database, msg),
         moderate_invites(ctx, &data, msg),
+        responses::response_handler(ctx, msg)
     );
 
     Ok(())

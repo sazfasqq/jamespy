@@ -1,6 +1,10 @@
-use ::serenity::all::{ChannelId, MessageId};
+use ::serenity::{
+    all::{ChannelId, MessageId, ReactionType},
+    small_fixed_array,
+};
 use dashmap::{DashMap, DashSet};
 use parking_lot::Mutex;
+use regex::Regex;
 use serenity::all::UserId;
 use sqlx::{Executor, PgPool, postgres::PgPoolOptions, query};
 use std::{
@@ -13,6 +17,8 @@ use crate::data::structs::{DmActivity, Error};
 use poise::serenity_prelude as serenity;
 
 use std::ops::Deref;
+
+use super::responses::{GuildCache, RegexData, ResponseCache, ResponseType};
 
 macro_rules! id_wrapper {
     ($wrapper_name:ident, $inner_name:ident) => {
@@ -119,6 +125,7 @@ pub async fn init_data() -> Database {
         banned_users,
         starboard: Mutex::new(StarboardHandler::default()),
         dm_activity: DashMap::new(),
+        responses: ResponseCache::default(),
     }
 }
 
@@ -140,6 +147,9 @@ pub struct Database {
 
     /// Runtime caches for dm activity.
     pub(crate) dm_activity: DashMap<UserId, DmActivity>,
+
+    /// caches for regex autoresponse stuff.
+    pub(crate) responses: ResponseCache,
 }
 
 #[derive(Default, Debug)]
@@ -238,6 +248,10 @@ impl Database {
     #[must_use]
     pub fn is_banned(&self, user_id: &UserId) -> bool {
         self.banned_users.contains(user_id)
+    }
+
+    pub fn invalidate_response_cache(&self) {
+        self.responses.guild.clear();
     }
 
     /// Sets the user banned/unbanned from the bot, returning the old status.
@@ -437,6 +451,105 @@ impl Database {
         .await?;
 
         Ok(())
+    }
+
+    pub async fn get_responses_regexes(
+        &self,
+        guild_id: serenity::GuildId,
+    ) -> Result<Option<GuildCache>, Error> {
+        let all_data = sqlx::query!(
+            "SELECT
+                r.id AS regex_id, r.channel_id, r.pattern,
+                r.recurse_channels, r.recurse_threads, r.detection_type,
+                resp.message, resp.emote_id
+            FROM regexes r
+            LEFT JOIN responses resp ON r.id = resp.regex_id
+            WHERE r.guild_id = $1",
+            guild_id.get() as i64
+        )
+        .fetch_all(&self.db)
+        .await?;
+
+        let mut guild_cache = GuildCache::default();
+        let mut emoji_cache: HashMap<i32, ReactionType> = HashMap::new();
+
+        for record in &all_data {
+            let exceptions = sqlx::query!(
+                "SELECT channel_id FROM regex_exceptions WHERE regex_id = $1",
+                record.regex_id
+            )
+            .fetch_all(&self.db)
+            .await
+            .unwrap();
+
+            let exception_channels = exceptions
+                .into_iter()
+                .map(|row| ChannelId::new(row.channel_id as u64))
+                .collect::<HashSet<_>>();
+
+            let response = if let Some(message) = &record.message {
+                ResponseType::Message(message.clone())
+            } else if let Some(emote_id) = record.emote_id {
+                let reaction = if let Some(cached_reaction) = emoji_cache.get(&emote_id) {
+                    cached_reaction.clone()
+                } else {
+                    let emote = sqlx::query!(
+                        "SELECT emote_name, discord_id FROM emotes WHERE id = $1",
+                        emote_id
+                    )
+                    .fetch_one(&self.db)
+                    .await
+                    .unwrap();
+
+                    let reaction = if let Some(discord_id) = emote.discord_id {
+                        ReactionType::Custom {
+                            animated: false,
+                            id: serenity::EmojiId::new(discord_id as u64),
+                            name: Some(small_fixed_array::FixedString::from_static_trunc("_")),
+                        }
+                    } else {
+                        ReactionType::Unicode(
+                            serenity::small_fixed_array::FixedString::from_string_trunc(
+                                emote.emote_name,
+                            ),
+                        )
+                    };
+
+                    emoji_cache.insert(emote_id, reaction.clone());
+
+                    reaction
+                };
+
+                ResponseType::Emoji(reaction)
+            } else {
+                ResponseType::Message("Default response".to_string())
+            };
+
+            let regex_data = RegexData {
+                id: record.regex_id,
+                pattern: Regex::new(&record.pattern).unwrap(),
+                recurse_channels: record.recurse_channels,
+                recurse_threads: record.recurse_threads,
+                response,
+                exceptions: exception_channels,
+                detection_type: (record.detection_type as u8).into(),
+            };
+
+            if let Some(channel_id) = record.channel_id {
+                guild_cache
+                    .channel
+                    .entry(ChannelId::new(channel_id as u64))
+                    .or_insert_with(Vec::new)
+                    .push(regex_data);
+            } else {
+                guild_cache.global.push(regex_data);
+            }
+        }
+
+        self.responses.guild.insert(guild_id, guild_cache);
+
+        // TODO: figure out an ergonomic way that i could run OCR without deadlocking if i don't clone.
+        Ok(self.responses.guild.get(&guild_id).map(|g| g.clone()))
     }
 
     /// Check if a starboard is being handled, and if its not, handle it.

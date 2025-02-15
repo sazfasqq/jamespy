@@ -26,6 +26,7 @@ pub struct Data {
     /// Experimental anti mass message deletion tracking.
     pub anti_delete_cache: AntiDeleteCache,
     pub starboard_config: StarboardConfig,
+    pub ocr_engine: crate::ocr::OcrEngine,
 }
 
 /// A struct only used to track if an error comes from a cooldown.
