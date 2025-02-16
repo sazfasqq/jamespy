@@ -36,6 +36,7 @@ pub async fn message(ctx: &serenity::Context, msg: &Message, data: Arc<Data>) ->
         }
     }
 
+    let mut dont_print = false;
     let (content, patterns) = {
         let config = &data.config.read().events;
 
@@ -44,7 +45,7 @@ pub async fn message(ctx: &serenity::Context, msg: &Message, data: Arc<Data>) ->
             config.no_log_channels.as_ref(),
             msg,
         ) {
-            return Ok(());
+            dont_print = true;
         }
 
         let maybe_flagged =
@@ -61,12 +62,14 @@ pub async fn message(ctx: &serenity::Context, msg: &Message, data: Arc<Data>) ->
 
     let author_string = author_string(ctx, msg);
 
-    println!(
-        "{HI_BLACK}[{guild_name}] [#{channel_name}]{RESET} {author_string}: \
-         {content}{RESET}{CYAN}{}{}{RESET}",
-        attachments.as_deref().unwrap_or(""),
-        embeds.as_deref().unwrap_or("")
-    );
+    if !dont_print {
+        println!(
+            "{HI_BLACK}[{guild_name}] [#{channel_name}]{RESET} {author_string}: \
+             {content}{RESET}{CYAN}{}{}{RESET}",
+            attachments.as_deref().unwrap_or(""),
+            embeds.as_deref().unwrap_or("")
+        );
+    }
 
     let guild_name = get_guild_name(ctx, guild_id);
     let _ = tokio::join!(
