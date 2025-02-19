@@ -7,7 +7,6 @@ use moth_core::data::database::{
     UserIdWrapper,
 };
 use poise::serenity_prelude as serenity;
-use small_fixed_array::FixedString;
 use std::sync::Arc;
 
 pub async fn starboard_add_handler(
@@ -195,7 +194,7 @@ async fn new(
     }
 
     let embeds = msg.embeds.iter().filter_map(|e| {
-        if e.kind == Some(FixedString::from_static_trunc("image")) {
+        if matches!(e.kind.as_deref(), Some("image") | Some("gifv")) {
             if let Some(url) = &e.url {
                 let base_url = url
                     .split_once('?')
