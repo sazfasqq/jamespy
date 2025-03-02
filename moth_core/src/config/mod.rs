@@ -41,7 +41,7 @@ impl MothConfig {
                     Err(e) => println!("Failed to save config: {e}"),
                 },
                 Err(e) => println!("Unable to write config: {e}"),
-            };
+            }
         }
     }
 

@@ -112,7 +112,7 @@ async fn shared(
         ctx.say("You require Manage Messages to be able to check expressions outside the guild.")
             .await?;
         return Ok(());
-    };
+    }
 
     let results = handle_expression_query(
         &ctx.data().database,

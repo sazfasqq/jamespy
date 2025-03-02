@@ -21,7 +21,7 @@ pub async fn reaction_add(
     // for reactions that don't matter.
     if add_reaction.guild_id.is_none() {
         return Ok(());
-    };
+    }
 
     // recieved over gateway, so a user is present.
     let user_id = add_reaction.user_id.unwrap();
@@ -66,7 +66,7 @@ pub async fn reaction_remove(
     // ditto.
     if removed_reaction.guild_id.is_none() {
         return Ok(());
-    };
+    }
 
     // ditto.
     let user_id = removed_reaction.user_id.unwrap();

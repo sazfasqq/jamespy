@@ -232,7 +232,7 @@ pub async fn cmd(ctx: Context<'_>, cmd_name: String) -> Result<(), Error> {
                 _ => ctx.say("Unknown Error type!").await?, // This shouldn't fire.
             };
         }
-    };
+    }
 
     Ok(())
 }
@@ -298,7 +298,7 @@ async fn handle_allow_owner(ctx: Context<'_>, user: &User) -> Result<(), Command
         .map_err(|_| CommandRestrictErr::AlreadyExists)?
     {
         return Err(CommandRestrictErr::AlreadyExists);
-    };
+    }
 
     Ok(())
 }
@@ -332,7 +332,7 @@ async fn handle_deny_owner(ctx: Context<'_>, user: &User) -> Result<(), CommandR
         .map_err(|_| CommandRestrictErr::DoesntExist)?
     {
         return Err(CommandRestrictErr::DoesntExist);
-    };
+    }
 
     Ok(())
 }

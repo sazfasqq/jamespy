@@ -29,7 +29,7 @@ pub async fn stickers(ctx: Context<'_>) -> Result<(), Error> {
         if let Some(desc) = sticker.description.clone() {
             println!("{}: {}", sticker.name, desc.len());
             writeln!(description, "**Description:** {desc}").unwrap();
-        };
+        }
 
         // if it can be parsed its just numbers and therefore a guild emote.
         // or it was custom set outside the discord client and is just random numbers.

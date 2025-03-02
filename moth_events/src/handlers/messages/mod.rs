@@ -190,7 +190,7 @@ pub async fn message_delete(
                 let _ = ChannelId::new(1284217769423798282)
                     .send_message(&ctx.http, builder)
                     .await;
-            };
+            }
         }
     }
 

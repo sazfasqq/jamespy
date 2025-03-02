@@ -306,7 +306,7 @@ impl Database {
         let Some(command) = command else {
             if self.owner_overwrites.owners_all.contains(&user_id) {
                 return Ok(true);
-            };
+            }
 
             self.insert_user(user_id).await?;
             query!(

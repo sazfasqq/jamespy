@@ -131,7 +131,7 @@ pub(crate) async fn role_update(
         modified = true;
         let changes = permission_changes(old_role.permissions, role.permissions);
         write!(string, "\n{changes}").unwrap();
-    };
+    }
 
     if old_role.hoist() != role.hoist() {
         modified = true;

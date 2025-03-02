@@ -77,7 +77,7 @@ pub fn get_cmd_name(
 
     if command_name.is_empty() {
         return Err(CommandRestrictErr::CommandNotFound);
-    };
+    }
 
     Ok(command_name)
 }

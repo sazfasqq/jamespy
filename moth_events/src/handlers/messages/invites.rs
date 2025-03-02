@@ -23,7 +23,7 @@ pub async fn moderate_invites(
 
     if guild_id != GuildId::new(98226572468690944) {
         return Ok(());
-    };
+    }
 
     let mut invites = Vec::new();
     for invite in INVITE.find_iter(&msg.content) {
@@ -81,7 +81,7 @@ pub async fn moderate_invites(
 
         if first_name.is_none() {
             first_name = Some(name);
-        };
+        }
 
         if embeds.len() < 10 {
             embeds.push(embed);

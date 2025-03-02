@@ -35,7 +35,7 @@ pub async fn guild_member_update(
                     new_nickname,
                     new_member.user.id
                 );
-            };
+            }
 
             if old_member.user.tag() != new_member.user.tag() {
                 println!(

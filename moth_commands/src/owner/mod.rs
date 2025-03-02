@@ -33,7 +33,7 @@ pub async fn owner(ctx: Context<'_>) -> Result<bool, Error> {
     // Owners will always be able to execute.
     if ctx.framework().options.owners.contains(user_id) {
         return Ok(true);
-    };
+    }
 
     Ok(ctx
         .data()

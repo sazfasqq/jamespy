@@ -84,7 +84,7 @@ pub async fn say_slash(
 
     if let Some(content) = content {
         b = b.content(content);
-    };
+    }
 
     // Overhall this later, because allocations.
     if let Some(sticker) = sticker {
@@ -97,18 +97,18 @@ pub async fn say_slash(
             .collect();
 
         b = b.add_sticker_ids(sticker_ids);
-    };
+    }
 
     if let Some(reply) = reply {
         b = b.reference_message(&reply);
-    };
+    }
 
     if let Some(attachment) = attachment {
         b = b.add_file(serenity::CreateAttachment::bytes(
             attachment.download().await?,
             attachment.filename,
         ));
-    };
+    }
 
     let result = ChannelId::new(channel.parse::<u64>().unwrap())
         .send_message(ctx.http(), b)
@@ -240,7 +240,7 @@ async fn sudo(
         } else {
             msg.member = None;
         }
-    };
+    }
 
     // set user.
     msg.author = user;

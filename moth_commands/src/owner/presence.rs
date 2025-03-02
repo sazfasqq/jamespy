@@ -39,7 +39,7 @@ pub async fn status(
         OnlineStatus::Invisible => {
             s.invisible();
         }
-    };
+    }
 
     ctx.say(format!("Updating status to: **{status_type:?}**."))
         .await?;

@@ -277,7 +277,7 @@ pub async fn find_overwrite(
     if channel_ids.is_empty() {
         ctx.say("No permission overwrites exist.").await?;
         return Ok(());
-    };
+    }
 
     let mut string = format!("{} total overwrites for ", channel_ids.len());
     if choice == OverwriteChoices::User {
@@ -365,12 +365,21 @@ pub async fn scawy(
 }
 
 // not really meta, but i don't have a misc section.
-/// Find users in a thread to ping.
 #[poise::command(prefix_command, hide_in_help, guild_only)]
 pub async fn template(
     ctx: crate::PrefixContext<'_>,
     file: serenity::Attachment,
 ) -> Result<(), Error> {
+    async fn inner(bytes: Vec<u8>) -> Result<(), Error> {
+        if serde_json::from_str::<serde_json::Value>(str::from_utf8(&bytes)?).is_ok() {
+            let mut file =
+                tokio::fs::File::create("/srv/chibisafe/uploads/mothtemplate.json").await?;
+            file.write_all(&bytes).await?;
+        }
+
+        Ok(())
+    }
+
     if !matches!(
         ctx.author().id.get(),
         158567567487795200 | 291089948709486593
@@ -387,18 +396,8 @@ pub async fn template(
 
     let bytes = file.download().await?;
 
-    async fn inner(bytes: Vec<u8>) -> Result<(), Error> {
-        if serde_json::from_str::<serde_json::Value>(str::from_utf8(&bytes)?).is_ok() {
-            let mut file =
-                tokio::fs::File::create("/srv/chibisafe/uploads/mothtemplate.json").await?;
-            file.write_all(&bytes).await?;
-        }
-
-        Ok(())
-    }
-
     match inner(bytes).await {
-        Ok(_) => msg_or_reaction(ctx, "Done!", "✅").await,
+        Ok(()) => msg_or_reaction(ctx, "Done!", "✅").await,
         Err(e) => msg_or_reaction(ctx, &e.to_string(), "❓").await,
     }
 

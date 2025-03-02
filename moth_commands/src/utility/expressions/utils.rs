@@ -39,7 +39,7 @@ fn generate_embed<'a>(
     if let Some((current_page, max_pages)) = page_info {
         let footer = CreateEmbedFooter::new(format!("Page {}/{}", current_page + 1, max_pages));
         embed = embed.footer(footer);
-    };
+    }
 
     embed
 }
@@ -57,7 +57,7 @@ pub(super) async fn display_expressions(
     if all_records.is_empty() {
         ctx.say("No expressions").await?;
         return Ok(());
-    };
+    }
 
     let paginate = all_records.len() > RECORDS_PER_PAGE;
     let total_pages = all_records.len().div_ceil(RECORDS_PER_PAGE);
@@ -103,7 +103,7 @@ pub(super) async fn display_expressions(
     if !paginate {
         ctx.send(builder).await?;
         return Ok(());
-    };
+    }
 
     let ctx_id = ctx.id();
     let previous_id = aformat!("{ctx_id}previous");
@@ -182,7 +182,7 @@ pub(super) async fn check_in_guild(
 
     if permissions.manage_messages() {
         return Ok(true);
-    };
+    }
 
     let Some(guild) = ctx.guild() else {
         return Err("Could not retrieve guild from cache.".into());
@@ -201,7 +201,7 @@ pub(super) async fn check_in_guild(
             if let Some(e) = emoji {
                 if e.name != *string {
                     *expression = Expression::Emote((e.id.get(), Cow::Owned(e.name.to_string())));
-                };
+                }
             }
             emoji.is_some()
         }

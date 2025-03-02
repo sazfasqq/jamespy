@@ -115,7 +115,7 @@ async fn purge_prep(
                 if users.is_empty() {
                     reaction_or_msg(ctx, "Cannot parse users.", "❓").await;
                     return Ok(None);
-                };
+                }
 
                 for msg in &messages {
                     let matches = users.contains(&msg.author.id);
