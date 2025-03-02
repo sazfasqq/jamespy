@@ -389,7 +389,7 @@ pub async fn template(
     }
 
     // a template is not even close to this big.
-    if file.size < 1_000_000 {
+    if file.size > 1_000_000 {
         msg_or_reaction(ctx, "too big...", "❓").await;
         return Ok(());
     }
