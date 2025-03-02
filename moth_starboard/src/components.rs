@@ -38,6 +38,8 @@ pub async fn handle_component(
                 ),
             )
             .await?;
+
+        return Ok(());
     }
 
     // on the race condition case i should probably send a response?

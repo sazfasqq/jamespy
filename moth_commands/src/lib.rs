@@ -41,11 +41,11 @@ pub fn commands() -> Vec<Command> {
 pub async fn command_check(ctx: Context<'_>) -> Result<bool, Error> {
     if ctx.author().bot() {
         return Ok(false);
-    };
+    }
 
     if ctx.framework().options.owners.contains(&ctx.author().id) {
         return Ok(true);
-    };
+    }
 
     let user_banned = ctx.data().database.is_banned(&ctx.author().id);
 

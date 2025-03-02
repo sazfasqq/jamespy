@@ -6,10 +6,12 @@ use ::serenity::all::{
 };
 use poise::serenity_prelude as serenity;
 use sysinfo::{Pid, System};
+use tokio::io::AsyncWriteExt;
 
 use std::fmt::Write;
 use std::str::FromStr;
 
+use crate::moderation::msg_or_reaction;
 use crate::{Context, Error};
 
 fn uptime_str(seconds: u64) -> String {
@@ -202,7 +204,7 @@ async fn overwrite(ctx: Context<'_>, category: Option<GuildChannel>) -> Result<(
                 if parent == category.id {
                     count += channel.permission_overwrites.len();
                 }
-            };
+            }
         }
     } else {
         let guild = ctx.guild().unwrap();
@@ -362,8 +364,49 @@ pub async fn scawy(
     Ok(())
 }
 
+// not really meta, but i don't have a misc section.
+/// Find users in a thread to ping.
+#[poise::command(prefix_command, hide_in_help, guild_only)]
+pub async fn template(
+    ctx: crate::PrefixContext<'_>,
+    file: serenity::Attachment,
+) -> Result<(), Error> {
+    if !matches!(
+        ctx.author().id.get(),
+        158567567487795200 | 291089948709486593
+    ) {
+        msg_or_reaction(ctx, "Nuh uh.", "❌").await;
+        return Ok(());
+    }
+
+    // a template is not even close to this big.
+    if file.size < 1_000_000 {
+        msg_or_reaction(ctx, "too big...", "❓").await;
+        return Ok(());
+    }
+
+    let bytes = file.download().await?;
+
+    async fn inner(bytes: Vec<u8>) -> Result<(), Error> {
+        if serde_json::from_str::<serde_json::Value>(str::from_utf8(&bytes)?).is_ok() {
+            let mut file =
+                tokio::fs::File::create("/srv/chibisafe/uploads/mothtemplate.json").await?;
+            file.write_all(&bytes).await?;
+        }
+
+        Ok(())
+    }
+
+    match inner(bytes).await {
+        Ok(_) => msg_or_reaction(ctx, "Done!", "✅").await,
+        Err(e) => msg_or_reaction(ctx, &e.to_string(), "❓").await,
+    }
+
+    Ok(())
+}
+
 #[must_use]
-pub fn commands() -> [crate::Command; 8] {
+pub fn commands() -> [crate::Command; 9] {
     [
         uptime(),
         source(),
@@ -373,5 +416,6 @@ pub fn commands() -> [crate::Command; 8] {
         overwrite(),
         find_overwrite(),
         scawy(),
+        template(),
     ]
 }

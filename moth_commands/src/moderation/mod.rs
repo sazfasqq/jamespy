@@ -60,6 +60,9 @@ pub async fn purge(
     Ok(())
 }
 
+static USER_REGEX: std::sync::LazyLock<regex::Regex> =
+    std::sync::LazyLock::new(|| regex::Regex::new(r"(<@!?(\d+)>)|(\d{16,20})").unwrap());
+
 async fn purge_prep(
     ctx: PrefixContext<'_>,
     limit: u8,
@@ -101,13 +104,22 @@ async fn purge_prep(
     for group in dbg!(command.0) {
         match group.modifier {
             Modifier::User => {
-                let Some(user) = serenity::parse_user_mention(&group.content) else {
+                let mut users = Vec::with_capacity(1);
+
+                for caps in USER_REGEX.captures_iter(&group.content) {
+                    if let Some(id) = caps.get(2).or_else(|| caps.get(3)) {
+                        users.push(id.as_str().parse::<serenity::UserId>().unwrap());
+                    }
+                }
+
+                if users.is_empty() {
                     reaction_or_msg(ctx, "Cannot parse users.", "❓").await;
                     return Ok(None);
                 };
 
                 for msg in &messages {
-                    let matches = msg.author.id == user;
+                    let matches = users.contains(&msg.author.id);
+
                     if matches != group.negated {
                         deleted.insert(msg.id);
                     }

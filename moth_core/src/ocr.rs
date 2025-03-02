@@ -45,7 +45,7 @@ impl OcrEngine {
                 () = async {
                     while let Some(OcrRequest { image_data, response }) = rx.recv().await {
                         let ocr_text = match tess.set_image_from_mem(&image_data) {
-                            Ok(())=>tess.get_utf8_text().map_err(OCRError::UTFError),
+                            Ok(())=> tess.get_utf8_text().map_err(OCRError::UTFError),
                             Err(e) => Err(OCRError::PixError(e)),
                         };
 

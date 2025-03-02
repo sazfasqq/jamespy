@@ -457,6 +457,10 @@ impl Database {
         &self,
         guild_id: serenity::GuildId,
     ) -> Result<Option<GuildCache>, Error> {
+        if let Some(cache) = self.responses.guild.get(&guild_id) {
+            return Ok(Some(cache.clone()));
+        }
+
         let all_data = sqlx::query!(
             "SELECT
                 r.id AS regex_id, r.channel_id, r.pattern,
