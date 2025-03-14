@@ -68,16 +68,6 @@ async fn purge_prep(
     limit: u8,
     command: Option<PurgeArgs>,
 ) -> Result<Option<HashSet<MessageId>>, Error> {
-    if ctx.author().id.get() != 158567567487795200 {
-        msg_or_reaction(
-            ctx,
-            "This command is restricted to Moxy only as this is some actual witchcraft",
-            "❌",
-        )
-        .await;
-        return Ok(None);
-    }
-
     if !(2..=100).contains(&limit) {
         reaction_or_msg(ctx, "Can't purge 1 or more than 100 messages.", "❓").await;
         return Ok(None);

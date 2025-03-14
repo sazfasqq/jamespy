@@ -365,7 +365,7 @@ pub async fn scawy(
 }
 
 // not really meta, but i don't have a misc section.
-#[poise::command(prefix_command, hide_in_help, guild_only)]
+#[poise::command(prefix_command, hide_in_help, guild_only, discard_spare_arguments)]
 pub async fn template(
     ctx: crate::PrefixContext<'_>,
     file: serenity::Attachment,
@@ -375,6 +375,8 @@ pub async fn template(
             let mut file =
                 tokio::fs::File::create("/srv/chibisafe/uploads/mothtemplate.json").await?;
             file.write_all(&bytes).await?;
+        } else {
+            return Err("Not a valid json file.".into());
         }
 
         Ok(())
