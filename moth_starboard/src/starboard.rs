@@ -195,7 +195,12 @@ async fn new(
 
     let embeds = msg.embeds.iter().filter_map(|e| {
         if matches!(e.kind.as_deref(), Some("image") | Some("gifv")) {
-            if let Some(url) = &e.url {
+            if let Some(url) = e
+                .image
+                .as_ref()
+                .map(|u| u.url.clone())
+                .or_else(|| e.url.clone())
+            {
                 let base_url = url
                     .split_once('?')
                     .map_or(url.to_string(), |a| a.0.to_string());

@@ -27,6 +27,8 @@ pub async fn unverify_all(ctx: Context<'_>) -> Result<(), Error> {
         208101469365207041,
         815083930591297546,
         1136901818882994207,
+        1011348779976372296,
+        109630313449148416,
     ];
 
     let users = {
@@ -48,14 +50,14 @@ pub async fn unverify_all(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = ctx.guild_id().unwrap();
     for user_id in users {
         if !no_nos.contains(&user_id.get()) {
-            guild_id
+            let _ = guild_id
                 .edit_member(
                     ctx.http(),
                     user_id,
                     // if discord ever adds other flags I should store them beforehand.
                     EditMember::new().flags(GuildMemberFlags::empty()),
                 )
-                .await?;
+                .await;
         }
     }
 
@@ -64,7 +66,34 @@ pub async fn unverify_all(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
+#[poise::command(
+    rename = "count-verified",
+    prefix_command,
+    hide_in_help,
+    owners_only,
+    guild_only
+)]
+pub async fn count_verified(ctx: Context<'_>) -> Result<(), Error> {
+    let count = {
+        let Some(cache) = ctx.guild() else {
+            ctx.say("Cannot find guild in cache.").await?;
+            return Ok(());
+        };
+
+        cache
+            .members
+            .iter()
+            .filter(|m| m.flags.contains(GuildMemberFlags::BYPASSES_VERIFICATION))
+            .count()
+    };
+
+    ctx.say(format!("{count} users are bypassing verification"))
+        .await?;
+
+    Ok(())
+}
+
 #[must_use]
-pub fn commands() -> [crate::Command; 1] {
-    [unverify_all()]
+pub fn commands() -> [crate::Command; 2] {
+    [unverify_all(), count_verified()]
 }
