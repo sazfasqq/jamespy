@@ -85,7 +85,7 @@ pub async fn stickers(ctx: Context<'_>) -> Result<(), Error> {
         )
         .await?;
 
-    while let Some(press) = ComponentInteractionCollector::new(ctx.serenity_context().shard.clone())
+    while let Some(press) = ComponentInteractionCollector::new(ctx.serenity_context())
         .filter(move |press| press.data.custom_id.starts_with(&ctx_id.to_string()))
         .timeout(std::time::Duration::from_secs(180))
         .await

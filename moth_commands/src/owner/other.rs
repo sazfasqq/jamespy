@@ -15,7 +15,7 @@ use crate::{owner::owner, Context, Error};
 pub async fn shutdown(ctx: Context<'_>) -> Result<(), Error> {
     ctx.say("**Bailing out, you are on your own. Good luck.**")
         .await?;
-    ctx.framework().shard_manager().shutdown_all().await;
+    ctx.serenity_context().shutdown_all();
     Ok(())
 }
 
@@ -191,7 +191,7 @@ async fn malloc_trim(ctx: Context<'_>) -> Result<(), Error> {
 )]
 async fn chunk_guild_members(ctx: Context<'_>, presences: Option<bool>) -> Result<(), Error> {
     let guild_id = ctx.guild_id().unwrap();
-    ctx.serenity_context().shard.chunk_guild(
+    ctx.serenity_context().chunk_guild(
         guild_id,
         None,
         presences.unwrap_or(false),

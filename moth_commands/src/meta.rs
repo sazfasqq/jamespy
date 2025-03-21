@@ -52,16 +52,7 @@ pub async fn source(ctx: Context<'_>) -> Result<(), Error> {
     interaction_context = "Guild|BotDm|PrivateChannel"
 )]
 pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
-    let shard_latency = {
-        let shard_id = ctx.serenity_context().shard_id;
-        let runners = ctx.framework().shard_manager.runners.lock().await;
-        let runner = runners.get(&shard_id);
-
-        // shard doesn't exist.
-        let Some(runner) = runner else { return Ok(()) };
-
-        runner.latency
-    };
+    let shard_latency = ctx.serenity_context().runner_info.lock().unwrap().latency;
 
     // right now i don't have the patience to drop the allocations here where they could be avoided.
     // i'll wait until a macro exists to do this for me.

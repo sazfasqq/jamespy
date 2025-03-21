@@ -157,7 +157,7 @@ pub async fn guild_user_cache(
 ///
 /// Returns `false` if it does not finish fast enough.
 async fn chunk_and_wait(ctx: Context<'_>, guild_id: GuildId) -> bool {
-    ctx.serenity_context().shard.chunk_guild(
+    ctx.serenity_context().chunk_guild(
         guild_id,
         None,
         false,
@@ -165,7 +165,7 @@ async fn chunk_and_wait(ctx: Context<'_>, guild_id: GuildId) -> bool {
         Some(ctx.id().to_string()),
     );
 
-    let mut stream = collect(&ctx.serenity_context().shard, |event| match event {
+    let mut stream = collect(ctx.serenity_context(), |event| match event {
         Event::GuildMembersChunk(e) => Some((e.nonce.clone(), e.chunk_count, e.chunk_index)),
         _ => None,
     });

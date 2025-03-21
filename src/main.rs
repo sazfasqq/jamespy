@@ -28,7 +28,6 @@ async fn main() {
         command_check: Some(|ctx| Box::pin(moth_commands::command_check(ctx))),
 
         skip_checks_for_owners: false,
-        event_handler: |framework, event| Box::pin(moth_events::event_handler(framework, event)),
         ..Default::default()
     };
 
@@ -50,6 +49,7 @@ async fn main() {
         .framework(framework)
         .data(data)
         .cache_settings(settings)
+        .event_handler(moth_events::Handler)
         .await
         .unwrap();
 

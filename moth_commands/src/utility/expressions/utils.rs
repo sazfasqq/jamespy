@@ -118,7 +118,7 @@ pub(super) async fn display_expressions(
 
     let msg = ctx.send(builder).await?;
 
-    while let Some(press) = ComponentInteractionCollector::new(ctx.serenity_context().shard.clone())
+    while let Some(press) = ComponentInteractionCollector::new(ctx.serenity_context())
         .filter(move |press| {
             press
                 .data

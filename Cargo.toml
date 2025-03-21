@@ -53,9 +53,9 @@ branch = "next"
 
 
 [workspace.dependencies.poise]
-git = "https://github.com/jamesbt365/poise"
+git = "https://github.com/serenity-rs/poise"
 features = ["cache"]
-branch = "compile"
+branch = "serenity-next"
 
 # patch for developing locally.
 #[patch."https://github.com/serenity-rs/serenity".serenity]

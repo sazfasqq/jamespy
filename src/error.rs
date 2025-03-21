@@ -113,9 +113,6 @@ pub async fn handler(error: poise::FrameworkError<'_, Data, Error>) {
         poise::FrameworkError::ArgumentParse {
             error, input, ctx, ..
         } => handle_argument_parse_error(ctx, input, error).await,
-        poise::FrameworkError::EventHandler { error, .. } => {
-            println!("Error in event handler: {error}");
-        }
         poise::FrameworkError::CooldownHit {
             remaining_cooldown,
             ctx,
