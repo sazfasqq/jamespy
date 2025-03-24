@@ -4,7 +4,7 @@ use std::time::Instant;
 use ::serenity::all::{
     ChannelId, ChannelType, GuildChannel, Mentionable, PermissionOverwriteType, RoleId, UserId,
 };
-use poise::serenity_prelude as serenity;
+use lumi::serenity_prelude as serenity;
 use sysinfo::{Pid, System};
 use tokio::io::AsyncWriteExt;
 
@@ -24,7 +24,7 @@ fn uptime_str(seconds: u64) -> String {
 }
 
 /// See how long I've been online for!
-#[poise::command(slash_command, prefix_command, category = "Meta", user_cooldown = 3)]
+#[lumi::command(slash_command, prefix_command, category = "Meta", user_cooldown = 3)]
 pub async fn uptime(ctx: Context<'_>) -> Result<(), Error> {
     let uptime = ctx.data().time_started.elapsed().as_secs();
 
@@ -36,14 +36,14 @@ pub async fn uptime(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 // Post a link to my source code!
-#[poise::command(slash_command, prefix_command, category = "Meta", user_cooldown = 3)]
+#[lumi::command(slash_command, prefix_command, category = "Meta", user_cooldown = 3)]
 pub async fn source(ctx: Context<'_>) -> Result<(), Error> {
     ctx.say("<https://github.com/moth-rs/moth>").await?;
     Ok(())
 }
 
 /// pong!
-#[poise::command(
+#[lumi::command(
     slash_command,
     prefix_command,
     category = "Meta",
@@ -79,7 +79,7 @@ pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
     ping_msg
         .edit(
             ctx,
-            poise::CreateReply::default().content("").embed(
+            lumi::CreateReply::default().content("").embed(
                 serenity::CreateEmbed::default().title("Pong!").fields([
                     shard,
                     ("GET Latency", format!("{get_latency}ms"), false),
@@ -102,7 +102,7 @@ fn bytes_to_mebibytes(bytes: u64) -> f64 {
     bytes as f64 / MEBIBYTE
 }
 
-#[poise::command(
+#[lumi::command(
     prefix_command,
     slash_command,
     hide_in_help,
@@ -158,12 +158,12 @@ async fn stats(ctx: Context<'_>) -> Result<(), Error> {
         );
     }
 
-    ctx.send(poise::CreateReply::default().embed(embed)).await?;
+    ctx.send(lumi::CreateReply::default().embed(embed)).await?;
 
     Ok(())
 }
 
-#[poise::command(prefix_command, hide_in_help)]
+#[lumi::command(prefix_command, hide_in_help)]
 async fn register(ctx: Context<'_>) -> Result<(), Error> {
     // This uses an inbuilt function because spy guild commands should only
     // be registered in the spy guild.
@@ -172,7 +172,7 @@ async fn register(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     aliases("overwrites"),
     prefix_command,
     hide_in_help,
@@ -215,14 +215,14 @@ async fn overwrite(ctx: Context<'_>, category: Option<GuildChannel>) -> Result<(
     Ok(())
 }
 
-#[derive(Debug, poise::ChoiceParameter, PartialEq)]
+#[derive(Debug, lumi::ChoiceParameter, PartialEq)]
 pub enum OverwriteChoices {
     User,
     Role,
 }
 
 /// Find permission overwrites for specific users.
-#[poise::command(
+#[lumi::command(
     rename = "find-overwrites",
     aliases("find-overwrite"),
     prefix_command,
@@ -287,7 +287,7 @@ pub async fn find_overwrite(
         .everyone(false)
         .all_roles(false);
     ctx.send(
-        poise::CreateReply::new()
+        lumi::CreateReply::new()
             .content(string)
             .embed(
                 serenity::CreateEmbed::new()
@@ -305,7 +305,7 @@ use serenity::futures::StreamExt;
 use serenity::model::channel::MessagesIter;
 
 /// Find users in a thread to ping.
-#[poise::command(
+#[lumi::command(
     prefix_command,
     slash_command,
     hide_in_help,
@@ -346,7 +346,7 @@ pub async fn scawy(
         .all_roles(false);
 
     ctx.send(
-        poise::CreateReply::new()
+        lumi::CreateReply::new()
             .content(string)
             .allowed_mentions(mentions),
     )
@@ -356,7 +356,7 @@ pub async fn scawy(
 }
 
 // not really meta, but i don't have a misc section.
-#[poise::command(prefix_command, hide_in_help, guild_only, discard_spare_arguments)]
+#[lumi::command(prefix_command, hide_in_help, guild_only, discard_spare_arguments)]
 pub async fn template(
     ctx: crate::PrefixContext<'_>,
     file: serenity::Attachment,

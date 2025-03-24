@@ -4,9 +4,9 @@ pub mod pagination;
 use std::time::Duration;
 
 pub use checks::*;
+use lumi::CreateReply;
 use moth_core::data::structs::{Context, Error};
 pub use pagination::*;
-use poise::CreateReply;
 
 pub async fn handle_cooldown(remaining_cooldown: Duration, ctx: Context<'_>) -> Result<(), Error> {
     let msg = format!(
@@ -21,8 +21,8 @@ pub async fn handle_cooldown(remaining_cooldown: Duration, ctx: Context<'_>) -> 
 
 pub async fn bot_permissions(ctx: crate::Context<'_>) -> Result<serenity::all::Permissions, Error> {
     match ctx {
-        poise::Context::Application(actx) => Ok(actx.interaction.app_permissions),
-        poise::Context::Prefix(pctx) => prefix_member_perms(pctx).await,
+        lumi::Context::Application(actx) => Ok(actx.interaction.app_permissions),
+        lumi::Context::Prefix(pctx) => prefix_member_perms(pctx).await,
     }
 }
 
@@ -48,7 +48,7 @@ pub async fn prefix_bot_perms(
         channel,
         guild
             .members
-            .get(&ctx.framework.bot_id())
+            .get(&ctx.serenity_context().cache.current_user().id)
             .expect("Bot member is always present in the guild cache."),
     );
 

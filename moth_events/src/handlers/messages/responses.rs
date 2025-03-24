@@ -1,7 +1,7 @@
 use std::{borrow::Cow, sync::Arc};
 
 use moth_core::data::responses::DetectionType;
-use poise::serenity_prelude as serenity;
+use lumi::serenity_prelude as serenity;
 
 pub async fn response_handler(ctx: &serenity::Context, msg: &serenity::Message) {
     if msg.author.id == ctx.cache.current_user().id {

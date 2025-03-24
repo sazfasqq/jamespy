@@ -2,7 +2,7 @@ use crate::{Command, Data};
 
 use std::sync::Arc;
 
-use poise::serenity_prelude::User;
+use lumi::serenity_prelude::User;
 
 pub enum CommandRestrictErr {
     CommandNotFound,

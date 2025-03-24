@@ -2,11 +2,11 @@ use crate::{Context, Error};
 use std::fmt::Write;
 
 use crate::utils::{get_cmd_name, handle_allow_cmd, handle_deny_cmd, CommandRestrictErr};
-use poise::serenity_prelude::{self as serenity, User};
+use lumi::serenity_prelude::{self as serenity, User};
 
 // This entire module needs new command/function names.
 
-#[poise::command(
+#[lumi::command(
     rename = "bot-ban",
     aliases("bb", "bban"),
     prefix_command,
@@ -28,7 +28,7 @@ pub async fn bot_ban(ctx: Context<'_>, user: User) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "bot-unban",
     aliases("bub", "bunban"),
     prefix_command,
@@ -50,7 +50,7 @@ pub async fn bot_unban(ctx: Context<'_>, user: User) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "allow-owner-cmd",
     aliases("aoc"),
     prefix_command,
@@ -86,7 +86,7 @@ pub async fn allow_owner_cmd(ctx: Context<'_>, user: User, cmd_name: String) -> 
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "deny-owner-cmd",
     aliases("doc"),
     prefix_command,
@@ -122,7 +122,7 @@ pub async fn deny_owner_cmd(ctx: Context<'_>, user: User, cmd_name: String) -> R
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "owner-overrides",
     aliases("oo"),
     prefix_command,
@@ -136,7 +136,7 @@ pub async fn owner_overrides(_: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(prefix_command, hide_in_help, owners_only)]
+#[lumi::command(prefix_command, hide_in_help, owners_only)]
 pub async fn user(ctx: Context<'_>, user: User) -> Result<(), Error> {
     let overrides = {
         let data = ctx.data();
@@ -173,12 +173,12 @@ pub async fn user(ctx: Context<'_>, user: User) -> Result<(), Error> {
             };
 
             if let Some(embed) = embed {
-                let msg = poise::CreateReply::new()
+                let msg = lumi::CreateReply::new()
                     .content("This user has overrides for all owner commands!")
                     .embed(embed);
                 ctx.send(msg).await?;
             } else {
-                let msg = poise::CreateReply::new()
+                let msg = lumi::CreateReply::new()
                     .content("This user has overrides for all owner commands!");
                 ctx.send(msg).await?;
             }
@@ -199,7 +199,7 @@ pub async fn user(ctx: Context<'_>, user: User) -> Result<(), Error> {
             };
 
             if let Some(embed) = embed {
-                let msg = poise::CreateReply::new().embed(embed);
+                let msg = lumi::CreateReply::new().embed(embed);
                 ctx.send(msg).await?;
             } else {
                 ctx.say("This user doesn't have any overrides!").await?;
@@ -215,7 +215,7 @@ pub async fn user(ctx: Context<'_>, user: User) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(prefix_command, hide_in_help, owners_only)]
+#[lumi::command(prefix_command, hide_in_help, owners_only)]
 pub async fn cmd(ctx: Context<'_>, cmd_name: String) -> Result<(), Error> {
     let res = get_cmd_name(&ctx.framework().options.commands, &cmd_name);
 
@@ -261,14 +261,14 @@ pub async fn cmd_overrides(ctx: Context<'_>, cmd_name: &str) -> Result<(), Error
             .title(format!("Overrides for {cmd_name}"))
             .description(description);
 
-        let msg = poise::CreateReply::new().embed(embed);
+        let msg = lumi::CreateReply::new().embed(embed);
         ctx.send(msg).await?;
     }
 
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     aliases("ao"),
     prefix_command,
     category = "Owner - Overrides",
@@ -303,7 +303,7 @@ async fn handle_allow_owner(ctx: Context<'_>, user: &User) -> Result<(), Command
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     aliases("do"),
     prefix_command,
     category = "Owner - Overrides",

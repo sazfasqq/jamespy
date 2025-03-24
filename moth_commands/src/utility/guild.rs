@@ -1,11 +1,11 @@
 use crate::{Context, Error};
-use poise::serenity_prelude::{
+use lumi::serenity_prelude::{
     self as serenity, ComponentInteractionCollector, CreateActionRow, CreateInteractionResponse,
     EmojiId, StickerFormatType,
 };
 use std::fmt::Write;
 
-#[poise::command(
+#[lumi::command(
     slash_command,
     prefix_command,
     install_context = "Guild|User",
@@ -76,7 +76,7 @@ pub async fn stickers(ctx: Context<'_>) -> Result<(), Error> {
 
     let msg = ctx
         .send(
-            poise::CreateReply::default()
+            lumi::CreateReply::default()
                 .embed(pages[0].clone())
                 .components(vec![CreateActionRow::Buttons(Cow::Owned(vec![
                     serenity::CreateButton::new(&prev_button_id).emoji('◀'),
@@ -114,7 +114,7 @@ pub async fn stickers(ctx: Context<'_>) -> Result<(), Error> {
     // clear components.
     msg.edit(
         ctx,
-        poise::CreateReply::new()
+        lumi::CreateReply::new()
             .embed(pages[current_page].clone())
             .components(vec![]),
     )

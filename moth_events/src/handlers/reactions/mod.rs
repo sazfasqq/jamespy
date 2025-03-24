@@ -9,7 +9,7 @@ use database::*;
 
 use moth_ansi::{HI_MAGENTA, RESET};
 
-use poise::serenity_prelude::{self as serenity, Reaction};
+use lumi::serenity_prelude::{self as serenity, Reaction};
 
 pub async fn reaction_add(
     ctx: &serenity::Context,

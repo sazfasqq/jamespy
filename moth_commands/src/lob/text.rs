@@ -3,10 +3,10 @@ use std::time::Duration;
 use crate::{Context, Error};
 use moth_core::data::lob::*;
 use moth_core::data::structs::InvocationData;
-use poise::serenity_prelude::{self as serenity, UserId};
+use lumi::serenity_prelude::{self as serenity, UserId};
 
 /// i lob
-#[poise::command(
+#[lumi::command(
     slash_command,
     prefix_command,
     install_context = "Guild|User",
@@ -28,7 +28,7 @@ pub async fn lob(ctx: Context<'_>) -> Result<(), Error> {
 async fn lob_cooldown(ctx: Context<'_>) -> Result<(), Error> {
     let duration = {
         let mut cooldown_tracker = ctx.command().cooldowns.lock().unwrap();
-        let mut cooldown_durations = poise::CooldownConfig::default();
+        let mut cooldown_durations = lumi::CooldownConfig::default();
 
         let osu_game_allowed_users = [
             UserId::from(101090238067113984), // Phil
@@ -71,7 +71,7 @@ async fn lob_cooldown(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 /// reload lob
-#[poise::command(
+#[lumi::command(
     rename = "reload-lob",
     aliases(
         "reloadlob",
@@ -96,7 +96,7 @@ pub async fn reload_lob(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 /// no lob
-#[poise::command(
+#[lumi::command(
     rename = "unload-lob",
     aliases("unloadlob", "unload_lob"),
     prefix_command,
@@ -112,7 +112,7 @@ pub async fn no_lob(ctx: Context<'_>) -> Result<(), Error> {
 
 use small_fixed_array::FixedString;
 
-#[poise::command(
+#[lumi::command(
     rename = "add-lob",
     aliases("addlob", "add_lob"),
     prefix_command,
@@ -139,14 +139,14 @@ pub async fn new_lob(
         format!("Added `{item}` to loblist!\n")
     };
 
-    ctx.send(poise::CreateReply::default().content(msg)).await?;
+    ctx.send(lumi::CreateReply::default().content(msg)).await?;
 
     add_lob(&item)?;
 
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "remove-lob",
     aliases("removelob", "remove_lob"),
     prefix_command,
@@ -161,14 +161,14 @@ pub async fn delete_lob(
     target: String,
 ) -> Result<(), Error> {
     if remove_lob(&target)? {
-        ctx.send(poise::CreateReply::default().content(format!(
+        ctx.send(lumi::CreateReply::default().content(format!(
             "Removed `{target}` from loblist!\nChanges will not be applied until bot restart or \
              until reload-lob is called!"
         )))
         .await?;
     } else {
         ctx.send(
-            poise::CreateReply::default()
+            lumi::CreateReply::default()
                 .content(format!("`{target}` was not found in the loblist.")),
         )
         .await?;
@@ -176,7 +176,7 @@ pub async fn delete_lob(
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "total-lobs",
     aliases(
         "totallobs",
@@ -194,13 +194,13 @@ pub async fn delete_lob(
 pub async fn total_lobs(ctx: Context<'_>) -> Result<(), Error> {
     let count = count_lob()?;
     ctx.send(
-        poise::CreateReply::default().content(format!("Currently, `{count}` lobs are stored.")),
+        lumi::CreateReply::default().content(format!("Currently, `{count}` lobs are stored.")),
     )
     .await?;
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "send-lobs",
     aliases("sendlobs", "send_lobs", "upload-lobs", "uploadlobs", "upload_lobs"),
     prefix_command,
@@ -210,7 +210,7 @@ pub async fn total_lobs(ctx: Context<'_>) -> Result<(), Error> {
 )]
 pub async fn send_lobs(ctx: Context<'_>) -> Result<(), Error> {
     let attachment = serenity::CreateAttachment::path(LOB_PATH).await?;
-    ctx.send(poise::CreateReply::default().attachment(attachment))
+    ctx.send(lumi::CreateReply::default().attachment(attachment))
         .await?;
     Ok(())
 }

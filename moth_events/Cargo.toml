@@ -12,7 +12,7 @@ moth_ansi = { path = "../moth_ansi" }
 moth_starboard = { path = "../moth_starboard" }
 
 serenity = { workspace = true }
-poise = { workspace = true }
+lumi = { workspace = true }
 sqlx = { workspace = true }
 tokio = { workspace = true }
 small-fixed-array = { workspace = true }

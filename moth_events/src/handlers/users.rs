@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use chrono::Utc;
 use moth_ansi::{HI_GREEN, RESET};
-use poise::serenity_prelude::{
+use lumi::serenity_prelude::{
     self as serenity, ChannelId, CreateEmbed, CreateEmbedAuthor, CreateEmbedFooter,
     GuildMemberUpdateEvent, Member,
 };

@@ -7,8 +7,8 @@ use crate::helper::{
 use crate::{Data, Error};
 
 use moth_ansi::{BLUE, HI_BLUE, RESET};
-use poise::serenity_prelude::audit_log::Action::VoiceChannelStatus;
-use poise::serenity_prelude::{
+use lumi::serenity_prelude::audit_log::Action::VoiceChannelStatus;
+use lumi::serenity_prelude::{
     self as serenity, ChannelFlags, ChannelId, ChannelType, CreateEmbed, ForumEmoji, GuildChannel,
     GuildId, PartialGuildChannel, UserId, VoiceChannelStatusAction,
 };

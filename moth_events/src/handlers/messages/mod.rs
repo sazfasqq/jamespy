@@ -15,7 +15,7 @@ use crate::{Data, Error};
 use moth_ansi::{CYAN, DIM, HI_BLACK, HI_RED, RESET};
 
 use database::{insert_deletion, insert_edit, insert_message};
-use poise::serenity_prelude::{
+use lumi::serenity_prelude::{
     self as serenity, ChannelId, Colour, CreateEmbed, CreateEmbedFooter, CreateMessage, GuildId,
     Message, MessageId, UserId,
 };

@@ -2,7 +2,7 @@ use serenity::all::{EditMember, GuildMemberFlags};
 
 use crate::{Context, Error};
 
-#[poise::command(
+#[lumi::command(
     rename = "unverify-all",
     prefix_command,
     required_bot_permissions = "MODERATE_MEMBERS",
@@ -66,7 +66,7 @@ pub async fn unverify_all(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "count-verified",
     prefix_command,
     hide_in_help,

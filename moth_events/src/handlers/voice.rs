@@ -5,7 +5,7 @@ use crate::{
     Error,
 };
 use moth_ansi::{GREEN, RESET};
-use poise::serenity_prelude::{self as serenity, VoiceState};
+use lumi::serenity_prelude::{self as serenity, VoiceState};
 
 pub async fn voice_state_update(
     ctx: &serenity::Context,

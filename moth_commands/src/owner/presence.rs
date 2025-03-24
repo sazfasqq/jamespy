@@ -1,10 +1,10 @@
-use poise::serenity_prelude::{ActivityData, ActivityType};
+use lumi::serenity_prelude::{ActivityData, ActivityType};
 
 use crate::{owner::owner, Context, Error};
 
 use small_fixed_array::FixedString;
 
-#[derive(Debug, poise::ChoiceParameter)]
+#[derive(Debug, lumi::ChoiceParameter)]
 pub enum OnlineStatus {
     Online,
     Idle,
@@ -14,7 +14,7 @@ pub enum OnlineStatus {
     Invisible,
 }
 
-#[poise::command(
+#[lumi::command(
     prefix_command,
     check = "owner",
     category = "Owner - Presence",
@@ -47,7 +47,7 @@ pub async fn status(
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "reset-presence",
     prefix_command,
     category = "Owner - Presence",
@@ -61,7 +61,7 @@ pub async fn reset_presence(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "set-activity",
     prefix_command,
     category = "Owner - Presence",

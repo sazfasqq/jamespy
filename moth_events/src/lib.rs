@@ -14,7 +14,7 @@
 )]
 
 use moth_core::data::structs::{Data, Error};
-use poise::serenity_prelude::{self as serenity, FullEvent};
+use lumi::serenity_prelude::{self as serenity, FullEvent};
 
 pub mod helper;
 

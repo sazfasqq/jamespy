@@ -4,7 +4,7 @@
 mod data;
 mod error;
 
-use poise::serenity_prelude::{self as serenity};
+use lumi::serenity_prelude::{self as serenity};
 use std::{sync::Arc, time::Duration};
 
 #[tokio::main]
@@ -12,12 +12,12 @@ async fn main() {
     tracing_subscriber::fmt::init();
     dotenvy::dotenv().unwrap();
 
-    let options = poise::FrameworkOptions {
+    let options = lumi::FrameworkOptions {
         commands: moth_commands::commands(),
-        prefix_options: poise::PrefixFrameworkOptions {
+        prefix_options: lumi::PrefixFrameworkOptions {
             prefix: Some("-".into()),
-            additional_prefixes: vec![poise::Prefix::Literal("m!"), poise::Prefix::Literal("m")],
-            edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
+            additional_prefixes: vec![lumi::Prefix::Literal("m!"), lumi::Prefix::Literal("m")],
+            edit_tracker: Some(Arc::new(lumi::EditTracker::for_timespan(
                 Duration::from_secs(600),
             ))),
             ..Default::default()
@@ -31,7 +31,7 @@ async fn main() {
         ..Default::default()
     };
 
-    let framework = poise::Framework::new(options);
+    let framework = lumi::Framework::new(options);
 
     let token = serenity::Token::from_env("MOTH_TOKEN")
         .expect("Missing `MOTH_TOKEN` environment variable.");

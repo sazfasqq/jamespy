@@ -1,11 +1,11 @@
 use crate::{Context, Error};
-use poise::serenity_prelude::{
+use lumi::serenity_prelude::{
     self as serenity, ActivityType, GuildMemberFlags, OnlineStatus, User,
 };
 use std::collections::HashMap;
 use std::fmt::Write;
 
-#[poise::command(
+#[lumi::command(
     slash_command,
     prefix_command,
     category = "Utility",
@@ -41,14 +41,14 @@ pub async fn statuses(ctx: Context<'_>) -> Result<(), Error> {
         message.push('\n');
     }
     message.push_str(&guild.presences.len().to_string());
-    ctx.send(poise::CreateReply::default().content(message))
+    ctx.send(lumi::CreateReply::default().content(message))
         .await?;
 
     Ok(())
 }
 
 /// See what games people are playing!
-#[poise::command(
+#[lumi::command(
     slash_command,
     prefix_command,
     category = "Utility",
@@ -103,7 +103,7 @@ pub async fn playing(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 /// See what osu! gamemodes people are playing!
-#[poise::command(
+#[lumi::command(
     slash_command,
     prefix_command,
     category = "Utility",
@@ -162,13 +162,13 @@ pub async fn osu(ctx: Context<'_>) -> Result<(), Error> {
         .description(description)
         .colour(serenity::Colour::BLUE);
 
-    ctx.send(poise::CreateReply::new().embed(embed)).await?;
+    ctx.send(lumi::CreateReply::new().embed(embed)).await?;
 
     Ok(())
 }
 
 /// See information about a users dm activity flag.
-#[poise::command(
+#[lumi::command(
     rename = "dm-activity-check",
     aliases("dm-activity"),
     prefix_command,
@@ -215,13 +215,13 @@ pub async fn dm_activity_check(ctx: Context<'_>, user: User) -> Result<(), Error
         embed = embed.field("Currently flagged until?", until, false);
     }
 
-    ctx.send(poise::CreateReply::default().embed(embed)).await?;
+    ctx.send(lumi::CreateReply::default().embed(embed)).await?;
 
     Ok(())
 }
 
 /// See what games people are playing!
-#[poise::command(
+#[lumi::command(
     rename = "flag-lb",
     aliases("flagged-lb", "dm-activity-lb"),
     prefix_command,
@@ -234,7 +234,7 @@ pub async fn flag_lb(ctx: Context<'_>) -> Result<(), Error> {
         return Ok(());
     }
 
-    // poise will display an error if this goes wrong, though at the same time it'll show an error if nobody is on the list.
+    // lumi will display an error if this goes wrong, though at the same time it'll show an error if nobody is on the list.
     let result =
         sqlx::query!("SELECT user_id, count FROM dm_activity ORDER BY count DESC LIMIT 20")
             .fetch_all(&ctx.data().database.db)
@@ -257,13 +257,13 @@ pub async fn flag_lb(ctx: Context<'_>) -> Result<(), Error> {
         .title("Top 20 users flagged with dm-activity")
         .description(description);
 
-    ctx.send(poise::CreateReply::default().embed(embed)).await?;
+    ctx.send(lumi::CreateReply::default().embed(embed)).await?;
 
     Ok(())
 }
 
 /// Display some details from the member object.
-#[poise::command(
+#[lumi::command(
     prefix_command,
     category = "Utility",
     guild_only,
@@ -281,7 +281,7 @@ pub async fn presence(ctx: Context<'_>, member: serenity::Member) -> Result<(), 
 }
 
 /// Display some details from the member object.
-#[poise::command(
+#[lumi::command(
     rename = "get-member",
     prefix_command,
     category = "Utility",
@@ -325,7 +325,7 @@ pub async fn get_member(ctx: Context<'_>, member: serenity::Member) -> Result<()
 
     embed = embed.field("Pending", member.pending().to_string(), true);
 
-    ctx.send(poise::CreateReply::default().embed(embed)).await?;
+    ctx.send(lumi::CreateReply::default().embed(embed)).await?;
 
     Ok(())
 }

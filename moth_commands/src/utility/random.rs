@@ -1,10 +1,10 @@
 use crate::{Context, Error};
-use poise::serenity_prelude::{self as serenity, Colour, CreateEmbedAuthor};
+use lumi::serenity_prelude::{self as serenity, Colour, CreateEmbedAuthor};
 use rand::RngCore;
 
 #[allow(clippy::too_many_arguments)]
 /// Make me decide for you!
-#[poise::command(
+#[lumi::command(
     slash_command,
     prefix_command,
     category = "Utility",
@@ -43,7 +43,7 @@ pub async fn choose(
     };
 
     ctx.send(
-        poise::CreateReply::default().embed(
+        lumi::CreateReply::default().embed(
             serenity::CreateEmbed::default()
                 .author(CreateEmbedAuthor::new(author.tag()).icon_url(author.face()))
                 .description(chosen_option)

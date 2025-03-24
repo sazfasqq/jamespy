@@ -1,12 +1,12 @@
 use crate::{Context, Error};
 use chrono::{DateTime, NaiveTime, TimeZone, Utc};
-use poise::{
+use lumi::{
     serenity_prelude::{ChannelId, GenericId, GuildId, UserId},
-    CooldownType,
+    CooldownType, StrArg,
 };
 use std::time::{Duration, Instant};
 
-#[poise::command(
+#[lumi::command(
     rename = "set-last-invocation",
     aliases("set-invoked"),
     prefix_command,
@@ -16,7 +16,7 @@ use std::time::{Duration, Instant};
 )]
 pub async fn set_last_invocation(
     ctx: Context<'_>,
-    #[description = "Id for the specified bucket."] data: GenericId,
+    #[description = "Id for the specified bucket."] data: StrArg<GenericId>,
     #[description = "Command by name"] command: String,
     #[description = "The cooldown bucket."] bucket: CooldownBucket,
     #[description = "The time to set to."] time: String,
@@ -49,19 +49,18 @@ pub async fn set_last_invocation(
             .lock()
             .unwrap()
             .set_last_invocation(CooldownType::Global, target_instant),
-        CooldownBucket::User => cmd
-            .cooldowns
-            .lock()
-            .unwrap()
-            .set_last_invocation(CooldownType::User(UserId::from(data.get())), target_instant),
+        CooldownBucket::User => cmd.cooldowns.lock().unwrap().set_last_invocation(
+            CooldownType::User(UserId::from(data.0.get())),
+            target_instant,
+        ),
         CooldownBucket::Guild => {
             cmd.cooldowns.lock().unwrap().set_last_invocation(
-                CooldownType::Guild(GuildId::from(data.get())),
+                CooldownType::Guild(GuildId::from(data.0.get())),
                 target_instant,
             );
         }
         CooldownBucket::Channel => cmd.cooldowns.lock().unwrap().set_last_invocation(
-            CooldownType::Channel(ChannelId::from(data.get())),
+            CooldownType::Channel(ChannelId::from(data.0.get())),
             target_instant,
         ),
         CooldownBucket::Member => {
@@ -73,7 +72,7 @@ pub async fn set_last_invocation(
             };
 
             cmd.cooldowns.lock().unwrap().set_last_invocation(
-                CooldownType::Member((UserId::from(data.get()), target_guild)),
+                CooldownType::Member((UserId::from(data.0.get()), target_guild)),
                 target_instant,
             );
         }
@@ -89,7 +88,7 @@ pub fn commands() -> [crate::Command; 1] {
     [set_last_invocation()]
 }
 
-#[derive(Debug, poise::ChoiceParameter)]
+#[derive(Debug, lumi::ChoiceParameter)]
 pub enum CooldownBucket {
     Global,
     User,

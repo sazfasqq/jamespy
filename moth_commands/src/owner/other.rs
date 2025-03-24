@@ -1,11 +1,11 @@
-use poise::serenity_prelude::{
+use lumi::serenity_prelude::{
     self as serenity, Attachment, ChannelId, ChunkGuildFilter, Message, ReactionType, StickerId,
     UserId,
 };
 
 use crate::{owner::owner, Context, Error};
 
-#[poise::command(
+#[lumi::command(
     prefix_command,
     aliases("kys"),
     category = "Owner",
@@ -20,7 +20,7 @@ pub async fn shutdown(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 /// Say something!
-#[poise::command(
+#[lumi::command(
     prefix_command,
     hide_in_help,
     check = "owner",
@@ -46,7 +46,7 @@ pub async fn say(
 ///
 /// Allowed mentions by default are set to true.
 #[allow(clippy::too_many_arguments)]
-#[poise::command(slash_command, hide_in_help, check = "owner", category = "Owner - Say")]
+#[lumi::command(slash_command, hide_in_help, check = "owner", category = "Owner - Say")]
 pub async fn say_slash(
     ctx: Context<'_>,
     // Have to manually parse this because discord guild command.
@@ -124,7 +124,7 @@ pub async fn say_slash(
 }
 
 /// dm a user!
-#[poise::command(
+#[lumi::command(
     prefix_command,
     hide_in_help,
     category = "Owner - Say",
@@ -148,7 +148,7 @@ pub async fn dm(
 }
 
 /// React to a message with a specific reaction!
-#[poise::command(
+#[lumi::command(
     prefix_command,
     hide_in_help,
     category = "Owner - Messages",
@@ -169,7 +169,7 @@ pub async fn react(
 }
 
 // This halfs the memory usage at startup, not sure about other cases.
-#[poise::command(prefix_command, category = "Owner", owners_only, hide_in_help)]
+#[lumi::command(prefix_command, category = "Owner", owners_only, hide_in_help)]
 async fn malloc_trim(ctx: Context<'_>) -> Result<(), Error> {
     unsafe {
         libc::malloc_trim(0);
@@ -181,7 +181,7 @@ async fn malloc_trim(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 /// requests chunks of all guild members in the current guild.
-#[poise::command(
+#[lumi::command(
     rename = "chunk-guild-members",
     prefix_command,
     check = "owner",
@@ -204,7 +204,7 @@ async fn chunk_guild_members(ctx: Context<'_>, presences: Option<bool>) -> Resul
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "fw-commands",
     prefix_command,
     check = "owner",
@@ -226,9 +226,9 @@ async fn fw_commands(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(prefix_command, owners_only, hide_in_help, guild_only)]
+#[lumi::command(prefix_command, owners_only, hide_in_help, guild_only)]
 async fn sudo(
-    ctx: poise::PrefixContext<'_, crate::Data, Error>,
+    ctx: lumi::PrefixContext<'_, crate::Data, Error>,
     user: serenity::User,
     #[rest] rest: String,
 ) -> Result<(), Error> {
@@ -250,10 +250,10 @@ async fn sudo(
     let content = format!("-{rest}");
     msg.content = small_fixed_array::FixedString::from_string_trunc(content);
 
-    if let Err(err) = poise::dispatch_message(
+    if let Err(err) = lumi::dispatch_message(
         ctx.framework,
         &msg,
-        poise::MessageDispatchTrigger::MessageCreate,
+        lumi::MessageDispatchTrigger::MessageCreate,
         &tokio::sync::Mutex::new(std::boxed::Box::new(()) as _),
         &mut Vec::new(),
     )
@@ -265,7 +265,7 @@ async fn sudo(
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     prefix_command,
     check = "owner",
     category = "Owner - Commands",
@@ -280,7 +280,7 @@ async fn analyze(ctx: Context<'_>, #[rest] msg: String) -> Result<(), Error> {
 
 #[must_use]
 pub fn commands() -> [crate::Command; 9] {
-    let say = poise::Command {
+    let say = lumi::Command {
         slash_action: say_slash().slash_action,
         parameters: say_slash().parameters,
         ..say()

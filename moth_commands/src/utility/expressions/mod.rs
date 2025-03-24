@@ -36,7 +36,7 @@ struct ExpressionCounts {
 }
 
 /// Display the usage of emoji's in reactions or messages.
-#[poise::command(
+#[lumi::command(
     slash_command,
     prefix_command,
     rename = "emoji-usage",
@@ -75,21 +75,21 @@ pub fn string_to_expression(emoji: &str) -> Option<Expression<'_>> {
 }
 
 /// Display usage of a reaction.
-#[poise::command(slash_command, prefix_command, category = "Utility", guild_only)]
+#[lumi::command(slash_command, prefix_command, category = "Utility", guild_only)]
 pub async fn reactions(ctx: Context<'_>, emoji: String) -> Result<(), Error> {
     let types: [EmoteUsageType; 1] = [EmoteUsageType::ReactionAdd];
     shared(ctx, emoji, &types, Some(false)).await
 }
 
 /// Display usage of emoji's through messages.
-#[poise::command(slash_command, prefix_command, category = "Utility", guild_only)]
+#[lumi::command(slash_command, prefix_command, category = "Utility", guild_only)]
 pub async fn messages(ctx: Context<'_>, emoji: String) -> Result<(), Error> {
     let types = [EmoteUsageType::Message];
     shared(ctx, emoji, &types, Some(true)).await
 }
 
 /// Display usage of emojis everywhere.
-#[poise::command(slash_command, prefix_command, category = "Utility", guild_only)]
+#[lumi::command(slash_command, prefix_command, category = "Utility", guild_only)]
 pub async fn all(ctx: Context<'_>, emoji: String) -> Result<(), Error> {
     let types = [EmoteUsageType::ReactionAdd, EmoteUsageType::Message];
     shared(ctx, emoji, &types, None).await

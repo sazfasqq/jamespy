@@ -7,7 +7,7 @@ use crate::{
     helper::{get_channel_name, get_guild_name_override, get_user},
     Data, Error,
 };
-use poise::serenity_prelude::{
+use lumi::serenity_prelude::{
     self as serenity, AuditLogEntry, AutoModAction, ChannelId, CreateEmbedAuthor, Guild, GuildId,
     Member, User,
 };

@@ -1,7 +1,7 @@
 use std::sync::{Arc, LazyLock};
 
 use moth_core::data::structs::Data;
-use poise::serenity_prelude::{self as serenity, ChannelId, CreateMessage, GuildId, Message};
+use lumi::serenity_prelude::{self as serenity, ChannelId, CreateMessage, GuildId, Message};
 use regex::Regex;
 
 use ::serenity::all::{CreateAllowedMentions, CreateEmbedAuthor};

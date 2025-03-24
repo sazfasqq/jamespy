@@ -1,10 +1,10 @@
 use crate::{owner::owner, Context, Error};
 use moth_ansi::RESET;
-use poise::serenity_prelude::{self as serenity, CreateEmbedFooter};
+use lumi::serenity_prelude::{self as serenity, CreateEmbedFooter};
 use sqlx::{query, Pool, Postgres, Row};
 use std::fmt::Write;
 
-#[poise::command(
+#[lumi::command(
     rename = "dbstats",
     aliases("db-stats", "db-info"),
     prefix_command,
@@ -50,7 +50,7 @@ pub async fn dbstats(ctx: Context<'_>) -> Result<(), Error> {
     let db_size = format!("{:.2} MB", db_size_bytes / (1024 * 1024));
 
     embed = embed.footer(CreateEmbedFooter::new(format!("Database size: {db_size}")));
-    ctx.send(poise::CreateReply::default().embed(embed)).await?;
+    ctx.send(lumi::CreateReply::default().embed(embed)).await?;
     Ok(())
 }
 
@@ -72,7 +72,7 @@ async fn query_table_info(
     Ok(info)
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "sql",
     prefix_command,
     category = "Owner - Database",
@@ -103,22 +103,22 @@ pub async fn sql(
             if row.len() == 1 && row.try_get::<i64, _>(0).is_ok() {
                 let count = row.get::<i64, _>(0);
                 let formatted = format!("Counted {count} rows in {elapsed}ms");
-                let message = poise::CreateReply::default().content(formatted);
+                let message = lumi::CreateReply::default().content(formatted);
                 ctx.send(message).await?;
             } else {
                 let formatted = format!("Query executed successfully in {elapsed}ms");
-                let message = poise::CreateReply::default().content(formatted);
+                let message = lumi::CreateReply::default().content(formatted);
                 ctx.send(message).await?;
             }
         }
         Ok(None) => {
             let formatted = format!("Query executed successfully in {elapsed}ms");
-            let message = poise::CreateReply::default().content(formatted);
+            let message = lumi::CreateReply::default().content(formatted);
             ctx.send(message).await?;
         }
         Err(err) => {
             let error_message = format!("Error executing query: {err:?}");
-            let message = poise::CreateReply::default().content(error_message);
+            let message = lumi::CreateReply::default().content(error_message);
             ctx.send(message).await?;
         }
     }

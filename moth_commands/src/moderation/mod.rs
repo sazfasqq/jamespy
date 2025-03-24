@@ -3,12 +3,12 @@ use std::{collections::HashSet, time::Duration};
 use crate::{Error, PrefixContext};
 
 use moth_events::handlers::messages::invites::INVITE;
-use poise::serenity_prelude as serenity;
+use lumi::serenity_prelude as serenity;
 use serenity::all::MessageId;
 use small_fixed_array::FixedString;
 
 /// Purge messages in a channel.
-#[poise::command(
+#[lumi::command(
     rename = "purge-in",
     prefix_command,
     category = "Moderation - Purge",
@@ -38,7 +38,7 @@ pub async fn purge_in(
 }
 
 /// Purge messages in a channel.
-#[poise::command(
+#[lumi::command(
     prefix_command,
     category = "Moderation - Purge",
     required_permissions = "MANAGE_MESSAGES",
@@ -261,7 +261,7 @@ struct ModifierGroup {
 struct PurgeArgs(pub Vec<ModifierGroup>);
 
 #[serenity::async_trait]
-impl<'a> poise::PopArgument<'a> for PurgeArgs {
+impl<'a> lumi::PopArgument<'a> for PurgeArgs {
     async fn pop_from(
         args: &'a str,
         attachment_index: usize,
@@ -272,7 +272,7 @@ impl<'a> poise::PopArgument<'a> for PurgeArgs {
         let mut rest = args.trim_start();
 
         if rest.is_empty() {
-            return Err((poise::TooFewArguments::default().into(), None));
+            return Err((lumi::TooFewArguments::default().into(), None));
         }
 
         let mut groups = Vec::new();

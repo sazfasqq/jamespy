@@ -4,7 +4,7 @@ use std::fmt::Write;
 use std::sync::Arc;
 
 use moth_ansi::{HI_GREEN, RED, RESET};
-use poise::serenity_prelude::{
+use lumi::serenity_prelude::{
     self as serenity, AutoArchiveDuration, ChannelId, ChannelType, Context, ForumLayoutType,
     GuildId, PermissionOverwrite, PermissionOverwriteType, Permissions, SortOrder, User, UserId,
 };

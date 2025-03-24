@@ -2,11 +2,11 @@ use crate::{moderation::msg_or_reaction, owner::owner, Context, Error};
 use futures::StreamExt;
 
 use ::serenity::all::{collect, Event, GuildId};
-use poise::serenity_prelude as serenity;
+use lumi::serenity_prelude as serenity;
 use std::{fmt::Write, time::Duration};
 
 /// View/set max messages cached per channel.
-#[poise::command(
+#[lumi::command(
     rename = "max-messages",
     prefix_command,
     category = "Owner - Cache",
@@ -35,7 +35,7 @@ pub async fn max_messages(
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "guild-cache-stats",
     prefix_command,
     category = "Owner - Cache",
@@ -64,12 +64,12 @@ pub async fn guild_cache_stats(ctx: Context<'_>) -> Result<(), Error> {
         .title("Guild Cache Stats")
         .field("Stats", stats, true);
 
-    ctx.send(poise::CreateReply::default().embed(embed)).await?;
+    ctx.send(lumi::CreateReply::default().embed(embed)).await?;
 
     Ok(())
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "guild-user-cache",
     prefix_command,
     category = "Owner - Cache",
@@ -140,7 +140,7 @@ pub async fn guild_user_cache(
         .everyone(false);
 
     ctx.send(
-        poise::CreateReply::new()
+        lumi::CreateReply::new()
             .content(content)
             .allowed_mentions(mentions)
             .attachment(serenity::CreateAttachment::bytes(
@@ -195,7 +195,7 @@ async fn chunk_and_wait(ctx: Context<'_>, guild_id: GuildId) -> bool {
     false
 }
 
-#[poise::command(
+#[lumi::command(
     rename = "invalidate-response-cache",
     prefix_command,
     category = "Owner - Cache",

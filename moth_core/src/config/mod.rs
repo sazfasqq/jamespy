@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
-use poise::serenity_prelude::{ChannelId, GuildId};
+use lumi::serenity_prelude::{ChannelId, GuildId};
 
 mod serialize;
 use serialize::{read_words_from_file, regex_patterns};

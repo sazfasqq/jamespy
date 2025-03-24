@@ -58,7 +58,7 @@ pub async fn command_check(ctx: Context<'_>) -> Result<bool, Error> {
 }
 
 async fn notify_user_ban(ctx: Context<'_>) -> Result<(), Error> {
-    use poise::serenity_prelude as serenity;
+    use lumi::serenity_prelude as serenity;
 
     let user = ctx.author();
     let author = serenity::CreateEmbedAuthor::new(ctx.author().tag()).icon_url(user.face());
@@ -73,6 +73,6 @@ async fn notify_user_ban(ctx: Context<'_>) -> Result<(), Error> {
         .thumbnail(ctx.cache().current_user().face())
         .colour(serenity::Colour::RED);
 
-    ctx.send(poise::CreateReply::new().embed(embed)).await?;
+    ctx.send(lumi::CreateReply::new().embed(embed)).await?;
     Ok(())
 }

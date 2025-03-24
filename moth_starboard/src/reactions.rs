@@ -1,6 +1,6 @@
 use crate::{Data, Error};
 use moth_core::data::database::StarboardMessage;
-use poise::serenity_prelude::{self as serenity, ChannelId, MessageId, Reaction, UserId};
+use lumi::serenity_prelude::{self as serenity, ChannelId, MessageId, Reaction, UserId};
 use small_fixed_array::FixedString;
 use std::collections::hash_map::Entry;
 use std::{str::FromStr, sync::Arc};

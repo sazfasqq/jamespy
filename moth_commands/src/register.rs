@@ -2,19 +2,19 @@
 
 use std::borrow::Cow;
 
-use poise::serenity_prelude as serenity;
+use lumi::serenity_prelude as serenity;
 use serenity::all::CollectComponentInteractions;
 
-// Modified version of the builtin poise function.
+// Modified version of the builtin lumi function.
 pub fn create_application_commands<U, E>(
-    commands: &[poise::Command<U, E>],
+    commands: &[lumi::Command<U, E>],
 ) -> (
     Vec<serenity::CreateCommand<'static>>,
     Vec<serenity::CreateCommand<'static>>,
 ) {
     fn recursively_add_context_menu_commands<U, E>(
         builder: &mut Vec<serenity::CreateCommand<'static>>,
-        command: &poise::Command<U, E>,
+        command: &lumi::Command<U, E>,
     ) {
         if let Some(context_menu_command) = command.create_as_context_menu_command() {
             builder.push(context_menu_command);
@@ -44,10 +44,10 @@ pub fn create_application_commands<U, E>(
     (commands_builder, owner_commands)
 }
 
-// Modified version of the inbuilt poise function.
+// Modified version of the inbuilt lumi function.
 // Will cleanup eventually.
 pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
-    ctx: poise::Context<'_, U, E>,
+    ctx: lumi::Context<'_, U, E>,
 ) -> Result<(), serenity::Error> {
     let create_commands = create_application_commands(&ctx.framework().options().commands);
     let num_commands = create_commands.0.len();
@@ -78,7 +78,7 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
             .emoji('🗑'),
     ]));
 
-    let builder = poise::CreateReply::default()
+    let builder = lumi::CreateReply::default()
         .content("Choose what to do with the commands:")
         .components(vec![components]);
 
@@ -95,7 +95,7 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
     reply
         .edit(
             ctx,
-            poise::CreateReply::default()
+            lumi::CreateReply::default()
                 .components(vec![])
                 .content("Processing... Please wait."),
         )

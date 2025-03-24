@@ -4,7 +4,7 @@ use crate::{Context, Error};
 use std::fmt::Write;
 
 /// Get the info of all characters in a message.
-#[poise::command(
+#[lumi::command(
     slash_command,
     prefix_command,
     category = "Utility",
@@ -43,7 +43,7 @@ pub async fn charinfo(
     }
 
     ctx.send(
-        poise::CreateReply::new().content(result).allowed_mentions(
+        lumi::CreateReply::new().content(result).allowed_mentions(
             CreateAllowedMentions::new()
                 .everyone(false)
                 .all_roles(false)

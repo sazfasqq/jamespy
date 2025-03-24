@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 sqlx = { workspace = true }
 tokio = { workspace = true }
-poise = { workspace = true }
+lumi = { workspace = true }
 serenity = { workspace = true }
 reqwest = { workspace = true }
 chrono = { workspace = true }

@@ -2,15 +2,15 @@ use dashmap::DashMap;
 use parking_lot::RwLock;
 use std::{collections::HashMap, time::Instant};
 
-use poise::serenity_prelude::{ChannelId, GuildId, MessageId, UserId};
+use lumi::serenity_prelude::{ChannelId, GuildId, MessageId, UserId};
 
 use std::sync::atomic::AtomicBool;
 
 pub type Error = Box<dyn std::error::Error + Send + Sync>;
-pub type Context<'a> = poise::Context<'a, Data, Error>;
-pub type PrefixContext<'a> = poise::PrefixContext<'a, Data, Error>;
-pub type FrameworkContext<'a> = poise::FrameworkContext<'a, Data, Error>;
-pub type Command = poise::Command<Data, Error>;
+pub type Context<'a> = lumi::Context<'a, Data, Error>;
+pub type PrefixContext<'a> = lumi::PrefixContext<'a, Data, Error>;
+pub type FrameworkContext<'a> = lumi::FrameworkContext<'a, Data, Error>;
+pub type Command = lumi::Command<Data, Error>;
 
 pub struct Data {
     /// If the bots startup has been handled in the `on_ready` event.

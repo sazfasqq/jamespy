@@ -1,7 +1,7 @@
 use ::serenity::{all::CreateAllowedMentions, small_fixed_array::FixedString};
 use moth_commands::utils::{handle_cooldown, prefix_bot_perms};
 use moth_core::data::structs::{Context, Data, Error, InvocationData};
-use poise::serenity_prelude as serenity;
+use lumi::serenity_prelude as serenity;
 
 async fn handle_command_error(ctx: Context<'_>, error: Error) {
     if let Some(invocation_data) = ctx.invocation_data::<InvocationData>().await {
@@ -35,13 +35,13 @@ async fn handle_command_check_failed(ctx: Context<'_>, error: Option<Error>) {
         if let Some(err) = error {
             embed = embed.description(err.to_string());
         }
-        let msg = poise::CreateReply::new().embed(embed);
+        let msg = lumi::CreateReply::new().embed(embed);
         let _ = ctx.send(msg).await;
     }
 
     match ctx {
-        poise::Context::Application(_) => text_response(ctx, error).await,
-        poise::Context::Prefix(pctx) => {
+        lumi::Context::Application(_) => text_response(ctx, error).await,
+        lumi::Context::Prefix(pctx) => {
             if let Ok(permissions) = prefix_bot_perms(pctx).await {
                 if permissions.send_messages() {
                     text_response(ctx, error).await;
@@ -76,7 +76,7 @@ async fn handle_argument_parse_error(ctx: Context<'_>, input: Option<String>, er
             .all_users(false);
         let _ = ctx
             .send(
-                poise::CreateReply::default()
+                lumi::CreateReply::default()
                     .content(response)
                     .allowed_mentions(mentions),
             )
@@ -84,8 +84,8 @@ async fn handle_argument_parse_error(ctx: Context<'_>, input: Option<String>, er
     }
 
     match ctx {
-        poise::Context::Application(_) => text_response(ctx, input, error).await,
-        poise::Context::Prefix(pctx) => {
+        lumi::Context::Application(_) => text_response(ctx, input, error).await,
+        lumi::Context::Prefix(pctx) => {
             if let Ok(permissions) = prefix_bot_perms(pctx).await {
                 if permissions.send_messages() {
                     text_response(ctx, input, error).await;
@@ -103,26 +103,26 @@ async fn handle_argument_parse_error(ctx: Context<'_>, input: Option<String>, er
     }
 }
 
-pub async fn handler(error: poise::FrameworkError<'_, Data, Error>) {
+pub async fn handler(error: lumi::FrameworkError<'_, Data, Error>) {
     match error {
-        poise::FrameworkError::Command { error, ctx, .. } => handle_command_error(ctx, error).await,
-        poise::FrameworkError::NotAnOwner { ctx, .. } => handle_not_owner_error(ctx).await,
-        poise::FrameworkError::CommandCheckFailed { error, ctx, .. } => {
+        lumi::FrameworkError::Command { error, ctx, .. } => handle_command_error(ctx, error).await,
+        lumi::FrameworkError::NotAnOwner { ctx, .. } => handle_not_owner_error(ctx).await,
+        lumi::FrameworkError::CommandCheckFailed { error, ctx, .. } => {
             handle_command_check_failed(ctx, error).await;
         }
-        poise::FrameworkError::ArgumentParse {
+        lumi::FrameworkError::ArgumentParse {
             error, input, ctx, ..
         } => handle_argument_parse_error(ctx, input, error).await,
-        poise::FrameworkError::CooldownHit {
+        lumi::FrameworkError::CooldownHit {
             remaining_cooldown,
             ctx,
             ..
         } => {
             let _ = handle_cooldown(remaining_cooldown, ctx).await;
         }
-        poise::FrameworkError::UnknownCommand { .. } => {}
+        lumi::FrameworkError::UnknownCommand { .. } => {}
         error => {
-            if let Err(e) = poise::builtins::on_error(error).await {
+            if let Err(e) = lumi::builtins::on_error(error).await {
                 println!("Error while handling error: {e}");
             }
         }

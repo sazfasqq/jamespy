@@ -10,7 +10,7 @@ moth_commands = { path = "moth_commands" }
 
 sqlx = { workspace = true }
 tokio = { workspace = true }
-poise = { workspace = true }
+lumi = { workspace = true }
 serenity = { workspace = true }
 reqwest = { workspace = true }
 parking_lot = { workspace = true }
@@ -52,10 +52,9 @@ default-features = false
 branch = "next"
 
 
-[workspace.dependencies.poise]
-git = "https://github.com/serenity-rs/poise"
-features = ["cache"]
-branch = "serenity-next"
+[workspace.dependencies.lumi]
+git = "https://github.com/moth-rs/lumi"
+branch = "main"
 
 # patch for developing locally.
 #[patch."https://github.com/serenity-rs/serenity".serenity]

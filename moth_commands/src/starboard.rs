@@ -1,12 +1,12 @@
 use crate::{Context, Error};
 
+use lumi::serenity_prelude::{self as serenity, UserId};
 use moth_core::data::database::StarboardStatus;
-use poise::serenity_prelude::{self as serenity, UserId};
 
 use itertools::Itertools;
 use std::fmt::Write;
 
-#[poise::command(
+#[lumi::command(
     prefix_command,
     hide_in_help,
     guild_only,
@@ -52,7 +52,7 @@ pub async fn list_queued(ctx: Context<'_>) -> Result<(), Error> {
             .title("Starboard entries in review")
             .description(description)
             .colour(serenity::Colour::BLUE);
-        let builder = poise::CreateReply::new().embed(embed);
+        let builder = lumi::CreateReply::new().embed(embed);
         ctx.send(builder).await?;
     }
 

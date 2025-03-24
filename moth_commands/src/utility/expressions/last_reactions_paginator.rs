@@ -2,7 +2,7 @@ use aformat::{aformat, aformat_into, ArrayString, CapStr, ToArrayString};
 use std::{borrow::Cow, fmt::Write};
 
 use crate::{Context, Error};
-use poise::CreateReply;
+use lumi::CreateReply;
 use serenity::all::{
     ComponentInteractionCollector, CreateActionRow, CreateButton, CreateEmbed, CreateEmbedFooter,
     CreateInteractionResponse, CreateInteractionResponseMessage, EmojiId,

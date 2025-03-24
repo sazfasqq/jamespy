@@ -6,7 +6,7 @@ use moth_core::data::database::{
     ChannelIdWrapper, MaybeMessageIdWrapper, MessageIdWrapper, StarboardMessage, StarboardStatus,
     UserIdWrapper,
 };
-use poise::serenity_prelude as serenity;
+use lumi::serenity_prelude as serenity;
 use std::sync::Arc;
 
 pub async fn starboard_add_handler(

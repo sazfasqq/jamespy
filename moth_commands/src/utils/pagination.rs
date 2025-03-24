@@ -1,10 +1,10 @@
 use std::borrow::Cow;
 
-use poise::serenity_prelude::{
+use lumi::serenity_prelude::{
     self as serenity, ComponentInteractionCollector, CreateActionRow, CreateEmbedFooter,
     CreateInteractionResponse,
 };
-use poise::{Context, CreateReply};
+use lumi::{Context, CreateReply};
 
 pub async fn presence_builder<U: Send + Sync + 'static, E>(
     ctx: Context<'_, U, E>,
@@ -23,7 +23,7 @@ pub async fn presence_builder<U: Send + Sync + 'static, E>(
 
     let msg = ctx
         .send(
-            poise::CreateReply::default()
+            lumi::CreateReply::default()
                 .embed(create_presence_embed(current_page, &footer, &pages))
                 .components(vec![CreateActionRow::Buttons(Cow::Owned(vec![
                     serenity::CreateButton::new(&prev_button_id).emoji('◀'),

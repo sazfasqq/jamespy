@@ -1,6 +1,6 @@
 use crate::{Context, Error};
+use lumi::{serenity_prelude::MessageId, StrArg};
 use moth_core::data::database::EmoteUsageType;
-use poise::serenity_prelude::MessageId;
 use sqlx::query_as;
 
 use super::Expression;
@@ -11,7 +11,7 @@ enum SearchContext {
 }
 
 /// Get a log of reactions for the guild or a message.
-#[poise::command(
+#[lumi::command(
     slash_command,
     prefix_command,
     rename = "last-reactions",
@@ -27,19 +27,19 @@ pub async fn last_reactions(ctx: Context<'_>, emoji: Option<String>) -> Result<(
 }
 
 /// Displays last reactions in the Guild.
-#[poise::command(slash_command, prefix_command, category = "Utility", guild_only)]
+#[lumi::command(slash_command, prefix_command, category = "Utility", guild_only)]
 pub async fn guild(ctx: Context<'_>, emoji: Option<String>) -> Result<(), Error> {
     shared(ctx, SearchContext::Guild, emoji).await
 }
 
 /// Displays last reactions on a Message.
-#[poise::command(slash_command, prefix_command, category = "Utility", guild_only)]
+#[lumi::command(slash_command, prefix_command, category = "Utility", guild_only)]
 pub async fn message(
     ctx: Context<'_>,
-    message: MessageId,
+    message: StrArg<MessageId>,
     emoji: Option<String>,
 ) -> Result<(), Error> {
-    shared(ctx, SearchContext::Message(message), emoji).await
+    shared(ctx, SearchContext::Message(message.0), emoji).await
 }
 
 async fn shared(

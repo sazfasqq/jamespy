@@ -12,7 +12,7 @@ moth_ansi = { path = "../moth_ansi" }
 moth_filter = { path = "../moth_filter" }
 
 serenity = { workspace = true }
-poise = { workspace = true }
+lumi = { workspace = true }
 sqlx = { workspace = true }
 reqwest.workspace = true
 chrono = { workspace = true }

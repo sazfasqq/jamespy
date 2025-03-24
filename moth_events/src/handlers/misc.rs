@@ -1,5 +1,5 @@
 use crate::{Data, Error};
-use poise::serenity_prelude::{self as serenity, Ready};
+use lumi::serenity_prelude::{self as serenity, Ready};
 
 use std::sync::atomic::Ordering;
 use std::sync::Arc;

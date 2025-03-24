@@ -2,7 +2,7 @@ use aformat::{aformat, ToArrayString};
 use std::{borrow::Cow, fmt::Write};
 
 use crate::{Context, Error};
-use poise::CreateReply;
+use lumi::CreateReply;
 use serenity::all::{
     ComponentInteractionCollector, CreateActionRow, CreateButton, CreateEmbed, CreateEmbedFooter,
     CreateInteractionResponse, CreateInteractionResponseMessage, EmojiId,
@@ -170,14 +170,14 @@ pub(super) async fn check_in_guild(
     }
 
     let permissions = match ctx {
-        poise::Context::Application(ctx) => ctx
+        lumi::Context::Application(ctx) => ctx
             .interaction
             .member
             .as_ref()
             .unwrap()
             .permissions
             .unwrap(),
-        poise::Context::Prefix(ctx) => crate::utils::prefix_member_perms(ctx).await?,
+        lumi::Context::Prefix(ctx) => crate::utils::prefix_member_perms(ctx).await?,
     };
 
     if permissions.manage_messages() {

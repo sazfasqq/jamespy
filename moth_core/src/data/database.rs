@@ -14,7 +14,7 @@ use std::{
 
 use crate::data::structs::{DmActivity, Error};
 
-use poise::serenity_prelude as serenity;
+use lumi::serenity_prelude as serenity;
 
 use std::ops::Deref;
 

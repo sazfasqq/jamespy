@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 moth_core = { path = "../moth_core" }
-poise.workspace = true
+lumi.workspace = true
 regex.workspace = true
 serenity.workspace = true
 small-fixed-array.workspace = true
