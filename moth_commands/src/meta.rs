@@ -5,6 +5,7 @@ use ::serenity::all::{
     ChannelId, ChannelType, GuildChannel, Mentionable, PermissionOverwriteType, RoleId, UserId,
 };
 use lumi::serenity_prelude as serenity;
+use moth_core::emojis::{Anger, Checkmark, Question};
 use sysinfo::{Pid, System};
 use tokio::io::AsyncWriteExt;
 
@@ -377,21 +378,21 @@ pub async fn template(
         ctx.author().id.get(),
         158567567487795200 | 291089948709486593
     ) {
-        msg_or_reaction(ctx, "Nuh uh.", "❌").await;
+        msg_or_reaction(ctx, "Nuh uh.", Anger::to_fixed_string()).await;
         return Ok(());
     }
 
     // a template is not even close to this big.
     if file.size > 1_000_000 {
-        msg_or_reaction(ctx, "too big...", "❓").await;
+        msg_or_reaction(ctx, "too big...", Question::to_fixed_string()).await;
         return Ok(());
     }
 
     let bytes = file.download().await?;
 
     match inner(bytes).await {
-        Ok(()) => msg_or_reaction(ctx, "Done!", "✅").await,
-        Err(e) => msg_or_reaction(ctx, &e.to_string(), "❓").await,
+        Ok(()) => msg_or_reaction(ctx, "Done!", Checkmark::to_fixed_string()).await,
+        Err(e) => msg_or_reaction(ctx, &e.to_string(), Question::to_fixed_string()).await,
     }
 
     Ok(())

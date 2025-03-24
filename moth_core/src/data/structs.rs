@@ -47,6 +47,13 @@ pub struct StarboardConfig {
     pub threshold: u8,
 }
 
+impl StarboardConfig {
+    #[must_use]
+    pub fn emoji_fixed_string(&self) -> serenity::small_fixed_array::FixedString {
+        serenity::small_fixed_array::FixedString::from_str_trunc(&self.star_emoji)
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct DmActivity {
     pub last_announced: i64,

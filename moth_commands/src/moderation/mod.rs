@@ -2,8 +2,9 @@ use std::{collections::HashSet, time::Duration};
 
 use crate::{Error, PrefixContext};
 
-use moth_events::handlers::messages::invites::INVITE;
 use lumi::serenity_prelude as serenity;
+use moth_core::emojis::{Question, X};
+use moth_events::handlers::messages::invites::INVITE;
 use serenity::all::MessageId;
 use small_fixed_array::FixedString;
 
@@ -23,7 +24,12 @@ pub async fn purge_in(
     command: Option<PurgeArgs>,
 ) -> Result<(), Error> {
     if seconds > 300 {
-        reaction_or_msg(ctx, "Cannot wait more than 5 minutes to purge.", "❌").await;
+        reaction_or_msg(
+            ctx,
+            "Cannot wait more than 5 minutes to purge.",
+            X::to_fixed_string(),
+        )
+        .await;
     }
 
     match purge_prep(ctx, limit, command).await? {
@@ -69,7 +75,12 @@ async fn purge_prep(
     command: Option<PurgeArgs>,
 ) -> Result<Option<HashSet<MessageId>>, Error> {
     if !(2..=100).contains(&limit) {
-        reaction_or_msg(ctx, "Can't purge 1 or more than 100 messages.", "❓").await;
+        reaction_or_msg(
+            ctx,
+            "Can't purge 1 or more than 100 messages.",
+            Question::to_fixed_string(),
+        )
+        .await;
         return Ok(None);
     }
 
@@ -91,7 +102,7 @@ async fn purge_prep(
         return Ok(Some(deleted));
     };
 
-    for group in dbg!(command.0) {
+    for group in command.0 {
         match group.modifier {
             Modifier::User => {
                 let mut users = Vec::with_capacity(1);
@@ -103,7 +114,7 @@ async fn purge_prep(
                 }
 
                 if users.is_empty() {
-                    reaction_or_msg(ctx, "Cannot parse users.", "❓").await;
+                    reaction_or_msg(ctx, "Cannot parse users.", Question::to_fixed_string()).await;
                     return Ok(None);
                 }
 
@@ -355,15 +366,15 @@ fn flush(
     *current_content = Vec::new();
 }
 
-pub async fn reaction_or_msg(ctx: PrefixContext<'_>, msg: &str, reaction: &str) {
+pub async fn reaction_or_msg(ctx: PrefixContext<'_>, msg: &str, reaction: FixedString) {
     message_react(ctx, true, msg, reaction).await;
 }
 
-pub async fn msg_or_reaction(ctx: PrefixContext<'_>, msg: &str, reaction: &str) {
+pub async fn msg_or_reaction(ctx: PrefixContext<'_>, msg: &str, reaction: FixedString) {
     message_react(ctx, false, msg, reaction).await;
 }
 
-async fn message_react(ctx: PrefixContext<'_>, flipped: bool, msg: &str, reaction: &str) {
+async fn message_react(ctx: PrefixContext<'_>, flipped: bool, msg: &str, reaction: FixedString) {
     let (message, react) = has_permissions(&ctx);
 
     if (flipped && react) || (!flipped && !message) {
@@ -371,10 +382,7 @@ async fn message_react(ctx: PrefixContext<'_>, flipped: bool, msg: &str, reactio
         if react {
             let _ = ctx
                 .msg
-                .react(
-                    ctx.http(),
-                    serenity::ReactionType::Unicode(FixedString::from_str_trunc(reaction)),
-                )
+                .react(ctx.http(), serenity::ReactionType::Unicode(reaction))
                 .await;
         }
     } else {

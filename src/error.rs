@@ -1,7 +1,7 @@
 use ::serenity::{all::CreateAllowedMentions, small_fixed_array::FixedString};
+use lumi::serenity_prelude as serenity;
 use moth_commands::utils::{handle_cooldown, prefix_bot_perms};
 use moth_core::data::structs::{Context, Data, Error, InvocationData};
-use lumi::serenity_prelude as serenity;
 
 async fn handle_command_error(ctx: Context<'_>, error: Error) {
     if let Some(invocation_data) = ctx.invocation_data::<InvocationData>().await {
@@ -50,7 +50,7 @@ async fn handle_command_check_failed(ctx: Context<'_>, error: Option<Error>) {
                         .msg
                         .react(
                             ctx.http(),
-                            serenity::ReactionType::Unicode(FixedString::from_static_trunc("❌")),
+                            serenity::ReactionType::Unicode(FixedString::from_static_trunc("💢")),
                         )
                         .await;
                 }
