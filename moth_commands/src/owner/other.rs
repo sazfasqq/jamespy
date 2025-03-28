@@ -10,12 +10,17 @@ use crate::{owner::owner, Context, Error};
     aliases("kys"),
     category = "Owner",
     owners_only,
-    hide_in_help
+    hide_in_help,
+    has_modifier
 )]
-pub async fn shutdown(ctx: Context<'_>) -> Result<(), Error> {
-    ctx.say("**Bailing out, you are on your own. Good luck.**")
-        .await?;
+pub async fn shutdown(ctx: crate::PrefixContext<'_>) -> Result<(), Error> {
+    if !ctx.mod_chars.contains('!') {
+        ctx.say("**Bailing out, you are on your own. Good luck.**")
+            .await?;
+    }
+
     ctx.serenity_context().shutdown_all();
+
     Ok(())
 }
 
