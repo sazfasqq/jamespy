@@ -101,6 +101,16 @@ async fn shared(
     types: &[EmoteUsageType],
     msg_type: Option<bool>,
 ) -> Result<(), Error> {
+    if &emoji == "⭐"
+        && ctx.guild_id() == Some(98226572468690944.into())
+        && (types.contains(&EmoteUsageType::ReactionAdd)
+            || types.contains(&EmoteUsageType::ReactionRemove))
+    {
+        ctx.say("Checking the star reaction usage is disabled to help prevent farming.")
+            .await?;
+        return Ok(());
+    }
+
     let Some(mut expression) = string_to_expression(&emoji) else {
         ctx.say("I could not parse an expression from this string.")
             .await?;

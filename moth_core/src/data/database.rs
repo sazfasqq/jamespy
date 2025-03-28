@@ -130,7 +130,7 @@ pub async fn init_data() -> Database {
 }
 
 /// Custom type.
-#[derive(Debug, Clone, sqlx::Type)]
+#[derive(Debug, Clone, sqlx::Type, PartialEq)]
 #[sqlx(type_name = "emoteusagetype")]
 pub enum EmoteUsageType {
     Message,
