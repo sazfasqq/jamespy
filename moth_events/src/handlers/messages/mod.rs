@@ -3,7 +3,6 @@ use std::sync::Arc;
 
 mod anti_delete;
 mod database;
-use ::serenity::all::{CreateEmbedAuthor, RoleId};
 pub use database::EMOJI_REGEX;
 use invites::moderate_invites;
 pub mod invites;
@@ -78,96 +77,10 @@ pub async fn message(ctx: &serenity::Context, msg: &Message, data: Arc<Data>) ->
         handle_dm(ctx, msg),
         insert_message(&data.database, msg),
         moderate_invites(ctx, &data, msg),
-        responses::response_handler(ctx, msg),
-        duplicates(ctx, msg, dont_print)
+        responses::response_handler(ctx, msg)
     );
 
     Ok(())
-}
-
-async fn duplicates(ctx: &serenity::Context, msg: &Message, ignored_print: bool) {
-    // Likely doesn't matter, like mudae.
-    if ignored_print {
-        return;
-    }
-
-    if msg.author.bot() {
-        return;
-    }
-
-    let Some(member) = &msg.member else { return };
-
-    if member.roles.contains(&RoleId::new(870779469504348220)) {
-        return;
-    }
-
-    if msg.content.as_str() == "" {
-        return;
-    }
-
-    // starts with a bot prefix
-    if ["<", ">", "+", "!"]
-        .iter()
-        .any(|&prefix| msg.content.starts_with(prefix))
-    {
-        return;
-    }
-
-    let is_same_content = {
-        ctx.cache
-            .channel_messages(msg.channel_id)
-            .and_then(|m| {
-                m.back().map(|first_message| {
-                    first_message.id != msg.id && first_message.content == msg.content
-                })
-            })
-            .unwrap_or(false)
-    };
-
-    if is_same_content {
-        let mentions = serenity::CreateAllowedMentions::new()
-            .users(vec![
-                UserId::new(158567567487795200),
-                UserId::new(230654081071448065),
-            ])
-            .all_roles(false)
-            .everyone(false);
-
-        let long_thing = "This means they might be a bot, but this **also could be a \
-                          misfire**.\nThis could be XP farming, please read \
-                          <#1348782991895171133> and ban if true.";
-
-        let content = msg.content.as_str();
-
-        let description = format!(
-            "**Content**: {}\n\n{long_thing}\n\nLink: {}",
-            &content[..content.len().min(2000)],
-            msg.link()
-        );
-
-        let embed = CreateEmbed::new()
-            .title("Back to back duplicate message content.")
-            .description(description)
-            .author(CreateEmbedAuthor::from(&msg.author));
-
-        let content = format!(
-            "Offending user: <@{}>\n-# CC: <@158567567487795200> <@230654081071448065>",
-            msg.author.id
-        );
-
-        let message = CreateMessage::new()
-            .embed(embed)
-            .content(content)
-            .allowed_mentions(mentions);
-
-        match ChannelId::new(158484765136125952)
-            .send_message(&ctx.http, message)
-            .await
-        {
-            Ok(_) => println!("Sent message in #war_room about potentional bot!"),
-            Err(e) => println!("Error notifying about bot: {e}"),
-        }
-    }
 }
 
 pub async fn message_edit(
@@ -254,10 +167,7 @@ pub async fn message_delete(
             embeds_fmt.as_deref().unwrap_or("")
         );
 
-        let _ = tokio::join!(
-            insert_deletion(&data.database, &message),
-            anti_bot(ctx, &message)
-        );
+        let _ = insert_deletion(&data.database, &message).await;
     } else {
         println!(
             "{HI_RED}{DIM}A message (ID:{deleted_message_id}) was deleted but was not in \
@@ -285,80 +195,6 @@ pub async fn message_delete(
     }
 
     Ok(())
-}
-
-/// Function to notify xp farm/botting.
-async fn anti_bot(ctx: &serenity::Context, msg: &Message) {
-    if msg.author.bot() {
-        return;
-    }
-
-    let Some(member) = &msg.member else { return };
-
-    if member.roles.contains(&RoleId::new(870779469504348220)) {
-        return;
-    }
-
-    let now = chrono::Utc::now().timestamp();
-    let msg_time = msg.timestamp.timestamp();
-
-    // Exit if the message is older than 2 seconds
-    if (now - msg_time).abs() > 2 {
-        return;
-    }
-
-    if ["<", ">", "+", "!"]
-        .iter()
-        .any(|&prefix| msg.content.starts_with(prefix))
-    {
-        return;
-    }
-
-    if msg.content.contains("https://") || msg.content.contains("discord.gg/") {
-        return;
-    }
-
-    let mentions = serenity::CreateAllowedMentions::new()
-        .users(vec![
-            UserId::new(158567567487795200),
-            UserId::new(230654081071448065),
-        ])
-        .all_roles(false)
-        .everyone(false);
-
-    let long_thing = "This means they might be a bot, but this **also could be a misfire**.\nThis \
-                      could be XP farming, please read <#1348782991895171133> and ban if true.";
-
-    let content = msg.content.as_str();
-
-    let description = format!(
-        "**Content**:{} \n\n{long_thing}\n\nLink: {}",
-        &content[..content.len().min(2000)],
-        msg.link()
-    );
-
-    let embed = CreateEmbed::new()
-        .title("Message deleted within 2 seconds of posting")
-        .description(description)
-        .author(CreateEmbedAuthor::from(&msg.author));
-
-    let content = format!(
-        "Offending user: <@{}>\n-# CC: <@158567567487795200> <@230654081071448065>",
-        msg.author.id
-    );
-
-    let message = CreateMessage::new()
-        .embed(embed)
-        .content(content)
-        .allowed_mentions(mentions);
-
-    match ChannelId::new(158484765136125952)
-        .send_message(&ctx.http, message)
-        .await
-    {
-        Ok(_) => println!("Sent message in #war_room about potentional bot!"),
-        Err(e) => println!("Error notifying about bot: {e}"),
-    }
 }
 
 fn should_skip_msg(
