@@ -56,7 +56,7 @@ pub(crate) async fn role_update(
     };
 
     let mut string = format!(
-        "{MAGENTA}[{guild_name}] A role {} (ID:{}) was updated!",
+        "{MAGENTA}[{guild_name}] A role {} (ID:{}) was updated!{RESET}",
         role.name, role.id
     );
 
