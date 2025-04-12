@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 mod anti_delete;
 mod database;
+use ::serenity::all::GenericChannelId;
 pub use database::EMOJI_REGEX;
 use invites::moderate_invites;
 pub mod invites;
@@ -15,8 +16,8 @@ use moth_ansi::{CYAN, DIM, HI_BLACK, HI_RED, RESET};
 
 use database::{insert_deletion, insert_edit, insert_message};
 use lumi::serenity_prelude::{
-    self as serenity, ChannelId, Colour, CreateEmbed, CreateEmbedFooter, CreateMessage, GuildId,
-    Message, MessageId, UserId,
+    self as serenity, Colour, CreateEmbed, CreateEmbedFooter, CreateMessage, GuildId, Message,
+    MessageId, UserId,
 };
 
 pub async fn message(ctx: &serenity::Context, msg: &Message, data: Arc<Data>) -> Result<(), Error> {
@@ -135,19 +136,19 @@ pub async fn message_edit(
 
 pub async fn message_delete(
     ctx: &serenity::Context,
-    channel_id: &ChannelId,
-    deleted_message_id: &MessageId,
-    guild_id: &Option<GuildId>,
+    channel_id: GenericChannelId,
+    deleted_message_id: MessageId,
+    guild_id: Option<GuildId>,
     data: Arc<Data>,
 ) -> Result<(), Error> {
-    let guild_name = get_guild_name_override(ctx, &data, *guild_id);
+    let guild_name = get_guild_name_override(ctx, &data, guild_id);
 
-    let channel_name = get_channel_name(ctx, *guild_id, *channel_id).await;
+    let channel_name = get_channel_name(ctx, guild_id, channel_id).await;
 
     // This works but might not be optimal.
     let message = ctx
         .cache
-        .message(*channel_id, *deleted_message_id)
+        .message(channel_id, deleted_message_id)
         .map(|message_ref| message_ref.clone());
 
     if let Some(message) = message {
@@ -187,7 +188,7 @@ pub async fn message_delete(
                         "This doesn't check my own database or oinks database.",
                     ));
                 let builder = CreateMessage::new().embed(embed);
-                let _ = ChannelId::new(1284217769423798282)
+                let _ = GenericChannelId::new(1284217769423798282)
                     .send_message(&ctx.http, builder)
                     .await;
             }

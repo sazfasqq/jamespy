@@ -397,15 +397,19 @@ fn has_permissions(ctx: &PrefixContext) -> (bool, bool) {
     if let Some(guild) = ctx.guild() {
         let mut from_thread = false;
 
-        let channel = guild.channels.get(&ctx.channel_id()).or_else(|| {
-            guild
-                .threads
-                .iter()
-                .find(|t| t.id == ctx.channel_id())
-                .inspect(|_| {
-                    from_thread = true;
-                })
-        });
+        let channel = guild
+            .channels
+            .get(&ctx.channel_id().expect_channel())
+            .or_else(|| {
+                guild
+                    .threads
+                    .iter()
+                    .find(|t| t.id == ctx.channel_id().expect_thread())
+                    .and_then(|thread| {
+                        from_thread = true;
+                        guild.channels.get(&thread.parent_id)
+                    })
+            });
 
         if let Some(channel) = channel {
             let permissions = guild.user_permissions_in(

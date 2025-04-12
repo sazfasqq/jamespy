@@ -1,10 +1,10 @@
 use std::sync::{Arc, LazyLock};
 
+use lumi::serenity_prelude::{self as serenity, CreateMessage, GuildId, Message};
 use moth_core::data::structs::Data;
-use lumi::serenity_prelude::{self as serenity, ChannelId, CreateMessage, GuildId, Message};
 use regex::Regex;
 
-use ::serenity::all::{CreateAllowedMentions, CreateEmbedAuthor};
+use ::serenity::all::{CreateAllowedMentions, CreateEmbedAuthor, GenericChannelId};
 use resvg::{tiny_skia::Pixmap, usvg::Tree};
 
 use crate::Error;
@@ -105,7 +105,7 @@ pub async fn moderate_invites(
             ));
         }
 
-        ChannelId::new(277163440999628800)
+        GenericChannelId::new(277163440999628800)
             .send_message(&ctx.http, builder)
             .await?;
     }

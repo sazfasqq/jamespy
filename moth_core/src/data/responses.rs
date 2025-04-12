@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use dashmap::DashMap;
 use regex::Regex;
-use serenity::all::{ChannelId, GuildId, ReactionType};
+use serenity::all::{GenericChannelId, GuildId, ReactionType};
 
 #[derive(Default)]
 pub struct ResponseCache {
@@ -12,7 +12,7 @@ pub struct ResponseCache {
 #[derive(Default, Debug, Clone)]
 pub struct GuildCache {
     pub global: Vec<RegexData>,
-    pub channel: HashMap<ChannelId, Vec<RegexData>>,
+    pub channel: HashMap<GenericChannelId, Vec<RegexData>>,
 }
 
 /// Generic `RegexData` that fits over the `guild_regexes` and `channel_regexes`.
@@ -27,7 +27,7 @@ pub struct RegexData {
     /// What response to send.
     pub response: ResponseType,
     /// What channels/threads to ignore.
-    pub exceptions: HashSet<ChannelId>,
+    pub exceptions: HashSet<GenericChannelId>,
     pub detection_type: DetectionType,
 }
 

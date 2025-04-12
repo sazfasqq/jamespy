@@ -13,8 +13,8 @@
     clippy::unused_async, // fix.
 )]
 
-use moth_core::data::structs::{Data, Error};
 use lumi::serenity_prelude::{self as serenity, FullEvent};
+use moth_core::data::structs::{Data, Error};
 
 pub mod helper;
 
@@ -53,7 +53,8 @@ pub async fn event_handler(
             guild_id,
             ..
         } => {
-            messages::message_delete(ctx, channel_id, deleted_message_id, guild_id, data).await?;
+            messages::message_delete(ctx, *channel_id, *deleted_message_id, *guild_id, data)
+                .await?;
         }
         FullEvent::ReactionAdd { add_reaction, .. } => {
             reactions::reaction_add(ctx, add_reaction, data).await?;

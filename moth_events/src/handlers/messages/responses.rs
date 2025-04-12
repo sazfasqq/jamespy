@@ -1,7 +1,7 @@
 use std::{borrow::Cow, sync::Arc};
 
-use moth_core::data::responses::DetectionType;
 use lumi::serenity_prelude as serenity;
+use moth_core::data::responses::DetectionType;
 
 pub async fn response_handler(ctx: &serenity::Context, msg: &serenity::Message) {
     if msg.author.id == ctx.cache.current_user().id {
@@ -90,7 +90,7 @@ pub async fn response_handler(ctx: &serenity::Context, msg: &serenity::Message) 
         }
 
         if let Some(category_id) = category_id {
-            if regex.exceptions.contains(&category_id) {
+            if regex.exceptions.contains(&category_id.widen()) {
                 continue;
             }
         }
@@ -149,21 +149,29 @@ pub async fn response_handler(ctx: &serenity::Context, msg: &serenity::Message) 
 pub fn prefix_bot_perms(
     ctx: &serenity::Context,
     guild_id: serenity::GuildId,
-    channel_id: serenity::ChannelId,
+    channel_id: serenity::GenericChannelId,
 ) -> Result<serenity::all::Permissions, crate::Error> {
     let Some(guild) = ctx.cache.guild(guild_id) else {
         return Err("Could not retrieve guild from cache.".into());
     };
 
-    let (channel, is_thread) = match guild.channels.get(&channel_id) {
-        Some(channel) => (channel, false),
-        None => guild
-            .threads
-            .iter()
-            .find(|c| c.id == channel_id)
-            .map(|channel| (channel, true))
-            .expect("Channels or threads are always sent alongside the guild."),
-    };
+    let (channel, is_thread) =
+        if let Some(channel) = guild.channels.get(&channel_id.expect_channel()) {
+            (channel, false)
+        } else {
+            let thread = guild
+                .threads
+                .iter()
+                .find(|t| t.id == channel_id.expect_thread())
+                .expect("Thread should exist if not found in channels.");
+
+            let parent_channel = guild
+                .channels
+                .get(&thread.parent_id)
+                .expect("Channel should be within the cache.");
+
+            (parent_channel, true)
+        };
 
     let mut permissions = guild.user_permissions_in(
         channel,
@@ -227,7 +235,11 @@ fn is_channel(
         return (true, None);
     };
 
-    if let Some(channel) = guild.channels.iter().find(|c| c.id == msg.channel_id) {
+    if let Some(channel) = guild
+        .channels
+        .iter()
+        .find(|c| c.id == msg.channel_id.expect_channel())
+    {
         return (true, channel.parent_id);
     }
 

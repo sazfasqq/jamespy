@@ -621,9 +621,9 @@ dependencies = [
 
 [[package]]
 name = "data-encoding"
-version = "2.8.0"
+version = "2.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "575f75dfd25738df5b91b8e43e14d44bda14637a58fae779fd2b064f8bf3e010"
+checksum = "2a2330da5de22e8a3cb63252ce2abb30116bf5265e89c0e01bc17015ce30a476"
 
 [[package]]
 name = "data-url"
@@ -1754,7 +1754,7 @@ dependencies = [
 [[package]]
 name = "lumi"
 version = "0.0.0"
-source = "git+https://github.com/moth-rs/lumi?branch=main#e130e2c9c48c0cfdcf5f7fd14775f8089def34c5"
+source = "git+https://github.com/moth-rs/lumi?branch=main#4f76ee906656c49125d132e385e27ee784c27243"
 dependencies = [
  "async-trait",
  "derivative",
@@ -1772,7 +1772,7 @@ dependencies = [
 [[package]]
 name = "lumi_macros"
 version = "0.0.0"
-source = "git+https://github.com/moth-rs/lumi?branch=main#e130e2c9c48c0cfdcf5f7fd14775f8089def34c5"
+source = "git+https://github.com/moth-rs/lumi?branch=main#4f76ee906656c49125d132e385e27ee784c27243"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -2651,6 +2651,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "ref-cast"
+version = "1.0.24"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4a0ae411dbe946a674d89546582cea4ba2bb8defac896622d6496f14c23ba5cf"
+dependencies = [
+ "ref-cast-impl",
+]
+
+[[package]]
+name = "ref-cast-impl"
+version = "1.0.24"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1165225c21bff1f3bbce98f5a1f889949bc902d3575308cc7b0de30b4f6d27c7"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.100",
+]
+
+[[package]]
 name = "regex"
 version = "1.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3061,7 +3081,7 @@ dependencies = [
 [[package]]
 name = "serenity"
 version = "0.12.4"
-source = "git+https://github.com/serenity-rs/serenity?branch=next#bd4d91dd02dac0a78bc90ee7e7dc709a1ed60edf"
+source = "git+https://github.com/serenity-rs/serenity?branch=next#06a16ac2d65c192f47541dfe6c45aacc29f38f9a"
 dependencies = [
  "aformat",
  "arrayvec",
@@ -3081,6 +3101,7 @@ dependencies = [
  "nonmax",
  "parking_lot",
  "percent-encoding",
+ "ref-cast",
  "reqwest",
  "serde",
  "serde_cow",

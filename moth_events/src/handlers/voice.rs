@@ -4,8 +4,8 @@ use crate::{
     helper::{get_guild_name_override, get_user},
     Error,
 };
-use moth_ansi::{GREEN, RESET};
 use lumi::serenity_prelude::{self as serenity, VoiceState};
+use moth_ansi::{GREEN, RESET};
 
 pub async fn voice_state_update(
     ctx: &serenity::Context,
@@ -50,8 +50,8 @@ async fn handle_switch(
         return Ok(());
     };
 
-    let channel_old_name = guild_cache.channels.get(&old_id).map(|c| &c.name);
-    let channel_new_name = guild_cache.channels.get(&new_id).map(|c| &c.name);
+    let channel_old_name = guild_cache.channels.get(&old_id).map(|c| &c.base.name);
+    let channel_new_name = guild_cache.channels.get(&new_id).map(|c| &c.base.name);
 
     // maybe i should use fixedstring directly?
     let old_name: Cow<str> = if let Some(channel_name) = channel_old_name {
@@ -98,7 +98,7 @@ async fn handle_leave(
     let channel_name = guild_cache
         .channels
         .get(&channel_id)
-        .map_or_else(|| "None", |c| c.name.as_str());
+        .map_or_else(|| "None", |c| c.base.name.as_str());
 
     let guild_name = get_guild_name_override(ctx, &ctx.data(), new.guild_id);
 
@@ -124,9 +124,9 @@ async fn handle_joins(ctx: &serenity::Context, new: &VoiceState) -> Result<(), E
 
     let channel = guild_cache.channels.get(&channel_id).unwrap();
 
-    let channel_name = &channel.name;
+    let channel_name = &channel.base.name;
 
-    let guild_name = get_guild_name_override(ctx, &ctx.data(), Some(channel.guild_id));
+    let guild_name = get_guild_name_override(ctx, &ctx.data(), Some(channel.base.guild_id));
 
     println!("{GREEN}[{guild_name}] {user_name} joined {channel_name} (ID:{channel_id}){RESET}");
     Ok(())

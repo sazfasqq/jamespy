@@ -6,12 +6,12 @@ use crate::helper::{
 
 use crate::{Data, Error};
 
-use moth_ansi::{BLUE, HI_BLUE, RESET};
 use lumi::serenity_prelude::audit_log::Action::VoiceChannelStatus;
 use lumi::serenity_prelude::{
     self as serenity, ChannelFlags, ChannelId, ChannelType, CreateEmbed, ForumEmoji, GuildChannel,
-    GuildId, PartialGuildChannel, UserId, VoiceChannelStatusAction,
+    GuildId, GuildThread, PartialGuildThread, UserId, VoiceChannelStatusAction,
 };
+use moth_ansi::{BLUE, HI_BLUE, RESET};
 
 use std::fmt::Write;
 use std::sync::Arc;
@@ -22,12 +22,12 @@ pub async fn channel_create(
     data: Arc<Data>,
     channel: &GuildChannel,
 ) -> Result<(), Error> {
-    let guild_name = get_guild_name_override(ctx, &data, Some(channel.guild_id));
+    let guild_name = get_guild_name_override(ctx, &data, Some(channel.base.guild_id));
 
-    let kind = channel_type_to_string(channel.kind);
+    let kind = channel_type_to_string(channel.base.kind);
     println!(
         "{BLUE}[{}] #{} ({}) was created!{RESET}",
-        guild_name, channel.name, kind
+        guild_name, channel.base.name, kind
     );
     Ok(())
 }
@@ -41,15 +41,15 @@ pub async fn channel_update(
     let mut channel_name = String::new();
     let mut kind = String::new();
     let mut diff = String::new();
-    let guild_name = get_guild_name_override(ctx, &data, Some(new.guild_id));
+    let guild_name = get_guild_name_override(ctx, &data, Some(new.base.guild_id));
 
     if let Some(old) = old {
-        channel_name = new.name.to_string();
-        kind = channel_type_to_string(new.kind);
+        channel_name = new.base.name.to_string();
+        kind = channel_type_to_string(new.base.kind);
 
         // Differences
-        if old.name != new.name {
-            writeln!(diff, "Name: {} -> {}", old.name, new.name).unwrap();
+        if old.base.name != new.base.name {
+            writeln!(diff, "Name: {} -> {}", old.base.name, new.base.name).unwrap();
         }
         if old.nsfw != new.nsfw {
             writeln!(diff, "NSFW: {} -> {}", old.nsfw, new.nsfw).unwrap();
@@ -61,8 +61,8 @@ pub async fn channel_update(
                 writeln!(
                     diff,
                     "Parent: {} -> {}",
-                    get_channel_name(ctx, Some(new.guild_id), old_parent_id).await,
-                    get_channel_name(ctx, Some(new.guild_id), new_parent_id).await
+                    get_channel_name(ctx, Some(new.base.guild_id), old_parent_id.widen()).await,
+                    get_channel_name(ctx, Some(new.base.guild_id), new_parent_id.widen()).await
                 )
                 .unwrap();
             }
@@ -70,7 +70,7 @@ pub async fn channel_update(
                 writeln!(
                     diff,
                     "Parent: None -> {}",
-                    get_channel_name(ctx, Some(new.guild_id), parent_id).await
+                    get_channel_name(ctx, Some(new.base.guild_id), parent_id.widen()).await
                 )
                 .unwrap();
             }
@@ -78,7 +78,7 @@ pub async fn channel_update(
                 writeln!(
                     diff,
                     "Parent: {} -> None",
-                    get_channel_name(ctx, Some(new.guild_id), parent_id).await
+                    get_channel_name(ctx, Some(new.base.guild_id), parent_id.widen()).await
                 )
                 .unwrap();
             }
@@ -105,7 +105,7 @@ pub async fn channel_update(
                     if old_overwrite.kind == new_overwrite.kind {
                         let changes_str = get_permission_changes(
                             ctx,
-                            new.guild_id,
+                            new.base.guild_id,
                             old_overwrite.allow,
                             new_overwrite.allow,
                             old_overwrite.deny,
@@ -119,7 +119,7 @@ pub async fn channel_update(
                 }
 
                 if !overwrite_found {
-                    let change = overwrite_removal(ctx, new.guild_id, old_overwrite).await;
+                    let change = overwrite_removal(ctx, new.base.guild_id, old_overwrite).await;
                     diff.push_str(&change);
                 }
             }
@@ -151,7 +151,7 @@ pub async fn channel_update(
             _ => {}
         }
 
-        match (old.rate_limit_per_user, new.rate_limit_per_user) {
+        match (old.base.rate_limit_per_user, new.base.rate_limit_per_user) {
             (Some(old_value), Some(new_value)) if old_value != new_value => {
                 writeln!(diff, "Slowmode: {old_value}s -> {new_value}s").unwrap();
             }
@@ -286,12 +286,12 @@ pub async fn channel_delete(
     data: Arc<Data>,
     channel: &GuildChannel,
 ) -> Result<(), Error> {
-    let kind = channel_type_to_string(channel.kind);
-    let guild_name = get_guild_name_override(ctx, &data, Some(channel.guild_id));
+    let kind = channel_type_to_string(channel.base.kind);
+    let guild_name = get_guild_name_override(ctx, &data, Some(channel.base.guild_id));
 
     println!(
         "{BLUE}[{}] #{} ({}) was deleted!{RESET}",
-        guild_name, channel.name, kind
+        guild_name, channel.base.name, kind
     );
 
     Ok(())
@@ -300,18 +300,15 @@ pub async fn channel_delete(
 pub async fn thread_create(
     ctx: &serenity::Context,
     data: Arc<Data>,
-    thread: &GuildChannel,
+    thread: &GuildThread,
     newly_created: &Option<bool>,
 ) -> Result<(), Error> {
-    let guild_id = thread.guild_id;
+    let guild_id = thread.base.guild_id;
     let guild_name = get_guild_name_override(ctx, &data, Some(guild_id));
-    let kind = channel_type_to_string(thread.kind);
+    let kind = channel_type_to_string(thread.base.kind);
 
-    let parent_channel_name = if let Some(parent_id) = thread.parent_id {
-        get_channel_name(ctx, Some(thread.guild_id), parent_id).await
-    } else {
-        "Unknown Channel".to_string()
-    };
+    let parent_channel_name =
+        get_channel_name(ctx, Some(thread.base.guild_id), thread.parent_id.widen()).await;
 
     if let Some(newly_created) = newly_created {
         if !newly_created {
@@ -321,7 +318,7 @@ pub async fn thread_create(
 
     println!(
         "{HI_BLUE}[{}] Thread #{} ({}) was created in #{}!{RESET}",
-        guild_name, thread.name, kind, parent_channel_name
+        guild_name, thread.base.name, kind, parent_channel_name
     );
 
     Ok(())
@@ -330,68 +327,65 @@ pub async fn thread_create(
 pub async fn thread_update(
     ctx: &serenity::Context,
     data: Arc<Data>,
-    old: &Option<GuildChannel>,
-    new: &GuildChannel,
+    old: &Option<GuildThread>,
+    new: &GuildThread,
 ) -> Result<(), Error> {
-    let guild_id = new.guild_id;
+    let guild_id = new.base.guild_id;
     let guild_name = get_guild_name_override(ctx, &data, Some(guild_id));
-    let kind = channel_type_to_string(new.kind);
+    let kind = channel_type_to_string(new.base.kind);
     let mut diff = String::new();
 
-    let parent_channel_name = if let Some(parent_id) = new.parent_id {
-        get_channel_name(ctx, Some(new.guild_id), parent_id).await
-    } else {
-        "Unknown Channel".to_string()
-    };
+    let parent_channel_name =
+        get_channel_name(ctx, Some(new.base.guild_id), new.parent_id.widen()).await;
 
     if let Some(old) = old {
-        if old.name != new.name {
-            writeln!(diff, "Name: {} -> {}\n", old.name, new.name).unwrap();
+        if old.base.name != new.base.name {
+            writeln!(diff, "Name: {} -> {}\n", old.base.name, new.base.name).unwrap();
         }
 
-        match (old.rate_limit_per_user, new.rate_limit_per_user) {
+        match (old.base.rate_limit_per_user, new.base.rate_limit_per_user) {
             (Some(old_value), Some(new_value)) if old_value != new_value => {
                 writeln!(diff, "Slowmode: {old_value}s -> {new_value}s").unwrap();
             }
             _ => {}
         }
 
-        if old.flags.contains(ChannelFlags::PINNED) != new.flags.contains(ChannelFlags::PINNED) {
-            if new.flags.contains(ChannelFlags::PINNED) {
-                diff.push_str("Pinned: true");
-            } else {
-                diff.push_str("Pinned: false");
+        // TODO: gnome forgot about this, will reimplement later.
+        /*         if old.flags.contains(ChannelFlags::PINNED) != new.flags.contains(ChannelFlags::PINNED) {
+                   if new.flags.contains(ChannelFlags::PINNED) {
+                       diff.push_str("Pinned: true");
+                   } else {
+                       diff.push_str("Pinned: false");
+                   }
+               }
+        */
+
+        let old_metadata = old.thread_metadata;
+        let new_metadata = new.thread_metadata;
+
+        if old.base.kind == ChannelType::PrivateThread {
+            match (old_metadata.invitable(), new_metadata.invitable()) {
+                (true, false) => diff.push_str("Invitable: false\n"),
+                (false, true) => diff.push_str("Invitable: true\n"),
+                _ => {}
             }
         }
 
-        if let (Some(old_metadata), Some(new_metadata)) = (old.thread_metadata, new.thread_metadata)
-        {
-            if old.kind == ChannelType::PrivateThread {
-                match (old_metadata.invitable(), new_metadata.invitable()) {
-                    (true, false) => diff.push_str("Invitable: false\n"),
-                    (false, true) => diff.push_str("Invitable: true\n"),
-                    _ => {}
-                }
-            }
+        match (old_metadata.archived(), new_metadata.archived()) {
+            (true, false) => diff.push_str("Archived: false\n"),
+            (false, true) => diff.push_str("Archived: true\n"),
+            _ => {}
+        }
+        match (old_metadata.locked(), new_metadata.locked()) {
+            (true, false) => diff.push_str("Locked: false\n"),
+            (false, true) => diff.push_str("Locked: true\n"),
+            _ => {}
+        }
 
-            match (old_metadata.archived(), new_metadata.archived()) {
-                (true, false) => diff.push_str("Archived: false\n"),
-                (false, true) => diff.push_str("Archived: true\n"),
-                _ => {}
-            }
-            match (old_metadata.locked(), new_metadata.locked()) {
-                (true, false) => diff.push_str("Locked: false\n"),
-                (false, true) => diff.push_str("Locked: true\n"),
-                _ => {}
-            }
-
-            if old_metadata.auto_archive_duration != new_metadata.auto_archive_duration {
-                let old_duration =
-                    auto_archive_duration_to_string(old_metadata.auto_archive_duration);
-                let new_duration =
-                    auto_archive_duration_to_string(new_metadata.auto_archive_duration);
-                writeln!(diff, "Archive Duration: {old_duration} -> {new_duration}").unwrap();
-            }
+        if old_metadata.auto_archive_duration != new_metadata.auto_archive_duration {
+            let old_duration = auto_archive_duration_to_string(old_metadata.auto_archive_duration);
+            let new_duration = auto_archive_duration_to_string(new_metadata.auto_archive_duration);
+            writeln!(diff, "Archive Duration: {old_duration} -> {new_duration}").unwrap();
         }
     }
 
@@ -400,7 +394,7 @@ pub async fn thread_update(
         println!(
             "{HI_BLUE}[{guild_name}] #{} in {parent_channel_name} was updated! \
              ({kind}){RESET}\n{diff}",
-            new.name
+            new.base.name
         );
     }
 
@@ -410,8 +404,8 @@ pub async fn thread_update(
 pub async fn thread_delete(
     ctx: &serenity::Context,
     data: Arc<Data>,
-    thread: &PartialGuildChannel,
-    full_thread_data: &Option<GuildChannel>,
+    thread: &PartialGuildThread,
+    full_thread_data: &Option<GuildThread>,
 ) -> Result<(), Error> {
     let guild_id = thread.guild_id;
     let mut channel_name = String::new();
@@ -420,14 +414,11 @@ pub async fn thread_delete(
     let guild_name = get_guild_name_override(ctx, &data, Some(guild_id));
 
     if let Some(full_thread) = full_thread_data {
-        channel_name = full_thread.name.to_string();
-        kind = channel_type_to_string(full_thread.kind);
+        channel_name = full_thread.base.name.to_string();
+        kind = channel_type_to_string(full_thread.base.kind);
 
-        if let Some(parent_id) = full_thread.parent_id {
-            parent_channel_name = get_channel_name(ctx, Some(thread.guild_id), parent_id).await;
-        } else {
-            parent_channel_name = "Unknown Channel".to_string();
-        }
+        parent_channel_name =
+            get_channel_name(ctx, Some(thread.guild_id), full_thread.parent_id.widen()).await;
     }
 
     if channel_name.is_empty() {
@@ -527,7 +518,9 @@ pub async fn add(
         let options = &log.options.as_ref().unwrap();
 
         if let Some(str) = &options.status {
-            if str == status.as_deref().unwrap_or_default() && options.channel_id == Some(*id) {
+            if str == status.as_deref().unwrap_or_default()
+                && options.channel_id == Some(id.widen())
+            {
                 user_id = Some(log.user_id.unwrap());
                 break;
             }
@@ -643,12 +636,15 @@ async fn send_msgs(
 
     if blacklisted {
         if let Some(announce) = announce {
-            announce.send_message(&ctx.http, msg.clone()).await?;
+            announce
+                .widen()
+                .send_message(&ctx.http, msg.clone())
+                .await?;
         }
     }
 
     if let Some(post) = post {
-        post.send_message(&ctx.http, msg).await?;
+        post.widen().send_message(&ctx.http, msg).await?;
     }
 
     Ok(())

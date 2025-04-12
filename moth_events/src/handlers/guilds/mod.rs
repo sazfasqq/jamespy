@@ -14,6 +14,7 @@ use lumi::serenity_prelude::{
 
 use moth_ansi::{RESET, YELLOW};
 
+use ::serenity::all::GenericChannelId;
 use serenity::model::guild::audit_log::Action;
 
 pub async fn guild_create(
@@ -110,7 +111,7 @@ pub async fn guild_audit_log_entry_create(
                     },
                     None => None,
                 },
-                options.channel_id, // culprit.
+                options.channel_id.map(GenericChannelId::expect_channel), // culprit.
             )
         } else {
             (None, None)
@@ -122,7 +123,7 @@ pub async fn guild_audit_log_entry_create(
 
         let mut status = format!(
             "Unknown (check #{})",
-            get_channel_name(ctx, Some(*guild_id), ChannelId::new(id)).await
+            get_channel_name(ctx, Some(*guild_id), GenericChannelId::new(id)).await
         )
         .to_string();
 
@@ -150,7 +151,7 @@ pub async fn guild_audit_log_entry_create(
         let footer = serenity::CreateEmbedFooter::new(format!(
             "User ID: {} • Please check status manually in #{}",
             entry.user_id.unwrap(),
-            get_channel_name(ctx, Some(*guild_id), ChannelId::new(id)).await
+            get_channel_name(ctx, Some(*guild_id), GenericChannelId::new(id)).await
         ));
         let mut embed = serenity::CreateEmbed::default()
             .author(CreateEmbedAuthor::new(author_title).icon_url(avatar_url))
@@ -165,10 +166,10 @@ pub async fn guild_audit_log_entry_create(
             .embed(embed)
             .content(format!("<@{}>", entry.user_id.unwrap()));
         // this is gg/osu only, so i won't enable configurable stuff for this.
-        ChannelId::new(158484765136125952)
+        GenericChannelId::new(158484765136125952)
             .send_message(&ctx.http, builder.clone())
             .await?;
-        ChannelId::new(1163544192866336808)
+        GenericChannelId::new(1163544192866336808)
             .send_message(&ctx.http, builder)
             .await?;
     }

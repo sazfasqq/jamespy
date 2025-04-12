@@ -2,11 +2,11 @@ use crate::{
     Data, Error,
     reactions::{get_reaction_count, get_unique_reaction_count},
 };
+use lumi::serenity_prelude as serenity;
 use moth_core::data::database::{
     ChannelIdWrapper, MaybeMessageIdWrapper, MessageIdWrapper, StarboardMessage, StarboardStatus,
     UserIdWrapper,
 };
-use lumi::serenity_prelude as serenity;
 use std::sync::Arc;
 
 pub async fn starboard_add_handler(
@@ -119,8 +119,15 @@ fn has_permissions(ctx: &serenity::Context, reaction: &serenity::Reaction) -> bo
     ) {
         let channel = guild
             .channels
-            .get(&reaction.channel_id)
-            .or(guild.threads.iter().find(|t| t.id == reaction.channel_id));
+            .get(&reaction.channel_id.expect_channel())
+            .or_else(|| {
+                guild
+                    .threads
+                    .iter()
+                    .find(|t| t.id == reaction.channel_id.expect_thread())
+                    .map(|thread| thread.parent_id)
+                    .and_then(|parent_id| guild.channels.get(&parent_id))
+            });
 
         if let Some(channel) = channel {
             let permissions = guild.user_permissions_in(
@@ -275,14 +282,14 @@ macro_rules! starboard_message_macro {
             guild
                 .channels
                 .iter()
-                .find(|c| c.id == *$starboard_msg.channel_id)
-                .map(|c| c.name.to_string())
+                .find(|c| c.id == $starboard_msg.channel_id.expect_channel())
+                .map(|c| c.base.name.to_string())
                 .unwrap_or_else(|| {
                     guild
                         .threads
                         .iter()
-                        .find(|t| t.id == *$starboard_msg.channel_id)
-                        .map(|t| t.name.to_string())
+                        .find(|t| t.id == $starboard_msg.channel_id.expect_thread())
+                        .map(|t| t.base.name.to_string())
                         .unwrap_or_else(|| format!("<#{}>", *$starboard_msg.channel_id))
                 })
         } else {

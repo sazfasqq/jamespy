@@ -1,5 +1,5 @@
 use moth_core::data::structs::{Data, StarboardConfig};
-use serenity::all::{ChannelId, GuildId};
+use serenity::all::{GenericChannelId, GuildId};
 use std::sync::{atomic::AtomicBool, Arc};
 
 pub async fn setup() -> Arc<Data> {
@@ -35,8 +35,16 @@ fn starboard_config() -> StarboardConfig {
             .map(|e| e.parse::<bool>().unwrap())
             .unwrap_or(true),
 
-        queue_channel: get_env_or_default!("STARBOARD_QUEUE", ChannelId, 1324543000600383549),
-        post_channel: get_env_or_default!("STARBOARD_CHANNEL", ChannelId, 1324437745854316564),
+        queue_channel: get_env_or_default!(
+            "STARBOARD_QUEUE",
+            GenericChannelId,
+            1324543000600383549
+        ),
+        post_channel: get_env_or_default!(
+            "STARBOARD_CHANNEL",
+            GenericChannelId,
+            1324437745854316564
+        ),
         guild_id: get_env_or_default!("STARBOARD_GUILD", GuildId, 98226572468690944),
         star_emoji: std::env::var("STARBOARD_EMOJI").unwrap_or("⭐".to_owned()),
         threshold: std::env::var("STARBOARD_THRESHOLD")

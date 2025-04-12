@@ -1,6 +1,6 @@
+use ::serenity::all::GenericChannelId;
 use lumi::serenity_prelude::{
-    self as serenity, Attachment, ChannelId, ChunkGuildFilter, Message, ReactionType, StickerId,
-    UserId,
+    self as serenity, Attachment, ChunkGuildFilter, Message, ReactionType, StickerId, UserId,
 };
 
 use crate::{owner::owner, Context, Error};
@@ -33,7 +33,7 @@ pub async fn shutdown(ctx: crate::PrefixContext<'_>) -> Result<(), Error> {
 )]
 pub async fn say(
     ctx: Context<'_>,
-    #[description = "Channel where the message will be sent"] channel: Option<ChannelId>,
+    #[description = "Channel where the message will be sent"] channel: Option<GenericChannelId>,
     #[description = "What to say"]
     #[rest]
     string: String,
@@ -115,7 +115,7 @@ pub async fn say_slash(
         ));
     }
 
-    let result = ChannelId::new(channel.parse::<u64>().unwrap())
+    let result = GenericChannelId::new(channel.parse::<u64>().unwrap())
         .send_message(ctx.http(), b)
         .await;
 

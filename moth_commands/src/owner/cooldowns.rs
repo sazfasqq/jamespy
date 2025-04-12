@@ -1,9 +1,10 @@
 use crate::{Context, Error};
 use chrono::{DateTime, NaiveTime, TimeZone, Utc};
 use lumi::{
-    serenity_prelude::{ChannelId, GenericId, GuildId, UserId},
+    serenity_prelude::{GenericId, GuildId, UserId},
     CooldownType, StrArg,
 };
+use serenity::all::GenericChannelId;
 use std::time::{Duration, Instant};
 
 #[lumi::command(
@@ -60,7 +61,7 @@ pub async fn set_last_invocation(
             );
         }
         CooldownBucket::Channel => cmd.cooldowns.lock().unwrap().set_last_invocation(
-            CooldownType::Channel(ChannelId::from(data.0.get())),
+            CooldownType::Channel(GenericChannelId::from(data.0.get())),
             target_instant,
         ),
         CooldownBucket::Member => {

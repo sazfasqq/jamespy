@@ -1,12 +1,13 @@
 use std::sync::Arc;
 
 use chrono::Utc;
-use moth_ansi::{HI_GREEN, RESET};
 use lumi::serenity_prelude::{
-    self as serenity, ChannelId, CreateEmbed, CreateEmbedAuthor, CreateEmbedFooter,
-    GuildMemberUpdateEvent, Member,
+    self as serenity, CreateEmbed, CreateEmbedAuthor, CreateEmbedFooter, GuildMemberUpdateEvent,
+    Member,
 };
+use moth_ansi::{HI_GREEN, RESET};
 
+use ::serenity::all::GenericChannelId;
 use small_fixed_array::FixedString;
 
 use crate::{helper::get_guild_name_override, Data, Error};
@@ -182,7 +183,7 @@ async fn dm_activity_new(
         embed = embed.description(format!("**Online on**:\n{stats}"));
     }
 
-    ChannelId::new(158484765136125952)
+    GenericChannelId::new(158484765136125952)
         .send_message(&ctx.http, serenity::CreateMessage::default().embed(embed))
         .await?;
 
@@ -245,7 +246,7 @@ async fn dm_activity_updated(
         embed = embed.description(format!("**Online on**:\n{stats}"));
     }
 
-    ChannelId::new(158484765136125952)
+    GenericChannelId::new(158484765136125952)
         .send_message(&ctx.http, serenity::CreateMessage::default().embed(embed))
         .await?;
 

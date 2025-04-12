@@ -1,18 +1,14 @@
-use std::collections::HashSet;
 use std::time::Instant;
 
 use ::serenity::all::{
-    ChannelId, ChannelType, GuildChannel, Mentionable, PermissionOverwriteType, RoleId, UserId,
+    ChannelId, ChannelType, GuildChannel, PermissionOverwriteType, RoleId, UserId,
 };
 use lumi::serenity_prelude as serenity;
-use moth_core::emojis::{Anger, Checkmark, Question};
 use sysinfo::{Pid, System};
-use tokio::io::AsyncWriteExt;
 
 use std::fmt::Write;
 use std::str::FromStr;
 
-use crate::moderation::msg_or_reaction;
 use crate::{Context, Error};
 
 fn uptime_str(seconds: u64) -> String {
@@ -184,7 +180,7 @@ async fn overwrite(ctx: Context<'_>, category: Option<GuildChannel>) -> Result<(
     let mut count = 0;
 
     if let Some(category) = &category {
-        if category.kind != ChannelType::Category {
+        if category.base.kind != ChannelType::Category {
             ctx.say("Not a category!").await?;
         }
     }

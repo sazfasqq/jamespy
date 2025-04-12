@@ -3,11 +3,12 @@ use crate::Data;
 use std::fmt::Write;
 use std::sync::Arc;
 
-use moth_ansi::{HI_GREEN, RED, RESET};
+use ::serenity::all::GenericChannelId;
 use lumi::serenity_prelude::{
-    self as serenity, AutoArchiveDuration, ChannelId, ChannelType, Context, ForumLayoutType,
-    GuildId, PermissionOverwrite, PermissionOverwriteType, Permissions, SortOrder, User, UserId,
+    self as serenity, AutoArchiveDuration, ChannelType, Context, ForumLayoutType, GuildId,
+    PermissionOverwrite, PermissionOverwriteType, Permissions, SortOrder, User, UserId,
 };
+use moth_ansi::{HI_GREEN, RED, RESET};
 
 // this function serves to help reduce the magic usage of to_user, serenity no longer
 // iterates through all caches to get the information, and that was poor anyway,
@@ -67,7 +68,7 @@ pub fn get_guild_name(ctx: &serenity::Context, guild_id: Option<GuildId>) -> Str
 pub async fn get_channel_name(
     ctx: &serenity::Context,
     guild_id: Option<GuildId>,
-    channel_id: ChannelId,
+    channel_id: GenericChannelId,
 ) -> String {
     // private channels don't really have names, serenity was doing sugar but its removed now.
     if guild_id.is_none() {
@@ -82,7 +83,7 @@ pub async fn get_channel_name(
 
     if let Ok(channel) = channel_id.to_channel(ctx, guild_id).await {
         if let Some(guild_channel) = channel.guild() {
-            return guild_channel.name.to_string();
+            return guild_channel.base.name.to_string();
         }
     }
 
@@ -93,19 +94,19 @@ pub async fn get_channel_name(
 fn retrieve_cached_name(
     ctx: &serenity::Context,
     guild_id: GuildId,
-    channel_id: ChannelId,
+    channel_id: GenericChannelId,
 ) -> Option<String> {
     let guild_cache = ctx.cache.guild(guild_id)?;
 
-    if let Some(channel) = guild_cache.channels.get(&channel_id) {
-        Some(channel.name.to_string())
+    if let Some(channel) = guild_cache.channels.get(&channel_id.expect_channel()) {
+        Some(channel.base.name.to_string())
     } else {
         // check for thread.
         let threads = &guild_cache.threads;
 
         for thread in threads {
             if thread.id == channel_id.get() {
-                return Some(thread.name.to_string());
+                return Some(thread.base.name.to_string());
             }
         }
         // none if failure to find a channel or thread.

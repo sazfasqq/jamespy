@@ -1,5 +1,5 @@
 use ::serenity::{
-    all::{ChannelId, MessageId, ReactionType},
+    all::{GenericChannelId, MessageId, ReactionType},
     small_fixed_array,
 };
 use dashmap::{DashMap, DashSet};
@@ -43,7 +43,7 @@ macro_rules! id_wrapper {
 }
 
 id_wrapper!(UserIdWrapper, UserId);
-id_wrapper!(ChannelIdWrapper, ChannelId);
+id_wrapper!(ChannelIdWrapper, GenericChannelId);
 id_wrapper!(MessageIdWrapper, MessageId);
 
 /// Because don't we all hate the orphan rule.
@@ -211,7 +211,7 @@ impl Database {
 
     pub async fn insert_channel(
         &self,
-        channel_id: serenity::ChannelId,
+        channel_id: serenity::GenericChannelId,
         guild_id: Option<serenity::GuildId>,
     ) -> Result<(), Error> {
         if let Some(guild_id) = guild_id {
@@ -488,7 +488,7 @@ impl Database {
 
             let exception_channels = exceptions
                 .into_iter()
-                .map(|row| ChannelId::new(row.channel_id as u64))
+                .map(|row| GenericChannelId::new(row.channel_id as u64))
                 .collect::<HashSet<_>>();
 
             let response = if let Some(message) = &record.message {
@@ -542,7 +542,7 @@ impl Database {
             if let Some(channel_id) = record.channel_id {
                 guild_cache
                     .channel
-                    .entry(ChannelId::new(channel_id as u64))
+                    .entry(GenericChannelId::new(channel_id as u64))
                     .or_insert_with(Vec::new)
                     .push(regex_data);
             } else {
@@ -685,7 +685,7 @@ impl Database {
         &self,
         starboard_message_id: MessageId,
         new_message_id: MessageId,
-        new_channel_id: ChannelId,
+        new_channel_id: GenericChannelId,
     ) -> Result<(), Error> {
         let status = StarboardStatus::Accepted;
 

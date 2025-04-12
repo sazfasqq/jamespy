@@ -34,15 +34,23 @@ pub async fn prefix_bot_perms(
     };
 
     let channel_id = ctx.channel_id();
-    let (channel, is_thread) = match guild.channels.get(&channel_id) {
-        Some(channel) => (channel, false),
-        None => guild
-            .threads
-            .iter()
-            .find(|c| c.id == channel_id)
-            .map(|channel| (channel, true))
-            .expect("Channels or threads are always sent alongside the guild."),
-    };
+    let (channel, is_thread) =
+        if let Some(channel) = guild.channels.get(&channel_id.expect_channel()) {
+            (channel, false)
+        } else {
+            let thread = guild
+                .threads
+                .iter()
+                .find(|t| t.id == channel_id.expect_thread())
+                .expect("Thread should exist if not found in channels.");
+
+            let parent_channel = guild
+                .channels
+                .get(&thread.parent_id)
+                .expect("Channel should be within the cache.");
+
+            (parent_channel, true)
+        };
 
     let mut permissions = guild.user_permissions_in(
         channel,
@@ -67,15 +75,23 @@ pub async fn prefix_member_perms(
     };
 
     let channel_id = ctx.channel_id();
-    let (channel, is_thread) = match guild.channels.get(&channel_id) {
-        Some(channel) => (channel, false),
-        None => guild
-            .threads
-            .iter()
-            .find(|c| c.id == channel_id)
-            .map(|channel| (channel, true))
-            .expect("Channels or threads are always sent alongside the guild."),
-    };
+    let (channel, is_thread) =
+        if let Some(channel) = guild.channels.get(&channel_id.expect_channel()) {
+            (channel, false)
+        } else {
+            let thread = guild
+                .threads
+                .iter()
+                .find(|t| t.id == channel_id.expect_thread())
+                .expect("Thread should exist if not found in channels.");
+
+            let parent_channel = guild
+                .channels
+                .get(&thread.parent_id)
+                .expect("Channel should be within the cache.");
+
+            (parent_channel, true)
+        };
 
     let mut permissions = guild.partial_member_permissions_in(
         channel,

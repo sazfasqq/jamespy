@@ -2,7 +2,7 @@ use dashmap::DashMap;
 use parking_lot::RwLock;
 use std::{collections::HashMap, time::Instant};
 
-use lumi::serenity_prelude::{ChannelId, GuildId, MessageId, UserId};
+use lumi::serenity_prelude::{GenericChannelId, GuildId, MessageId, UserId};
 
 use std::sync::atomic::AtomicBool;
 
@@ -37,9 +37,9 @@ pub struct InvocationData {
 pub struct StarboardConfig {
     pub active: bool,
     /// The review queue channel.
-    pub queue_channel: ChannelId,
+    pub queue_channel: GenericChannelId,
     /// The channel to post the starboard in once reviewed.
-    pub post_channel: ChannelId,
+    pub post_channel: GenericChannelId,
     /// The star emoji to look for.
     pub star_emoji: String,
     /// The single guild the starboard is configured for.

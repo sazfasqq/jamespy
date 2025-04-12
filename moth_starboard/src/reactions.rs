@@ -1,6 +1,6 @@
 use crate::{Data, Error};
+use lumi::serenity_prelude::{self as serenity, GenericChannelId, MessageId, Reaction, UserId};
 use moth_core::data::database::StarboardMessage;
-use lumi::serenity_prelude::{self as serenity, ChannelId, MessageId, Reaction, UserId};
 use small_fixed_array::FixedString;
 use std::collections::hash_map::Entry;
 use std::{str::FromStr, sync::Arc};
@@ -92,7 +92,7 @@ fn maybe_mutate(
 async fn fetch_and_store_uncached(
     ctx: &serenity::Context,
     data: &Arc<Data>,
-    channel_id: ChannelId,
+    channel_id: GenericChannelId,
     message_id: MessageId,
     author_id: UserId,
 ) -> Result<(UserId, Vec<UserId>), Error> {
