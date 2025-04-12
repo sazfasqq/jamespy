@@ -302,104 +302,8 @@ pub async fn find_overwrite(
     Ok(())
 }
 
-use serenity::futures::StreamExt;
-use serenity::model::channel::MessagesIter;
-
-/// Find users in a thread to ping.
-#[lumi::command(
-    prefix_command,
-    slash_command,
-    hide_in_help,
-    guild_only,
-    required_permissions = "MANAGE_MESSAGES"
-)]
-pub async fn scawy(
-    ctx: Context<'_>,
-    #[channel_types("PublicThread", "PrivateThread")] channel: GuildChannel,
-) -> Result<(), Error> {
-    if channel.kind != ChannelType::PublicThread && channel.kind != ChannelType::PrivateThread {
-        ctx.say("Die.").await?;
-        return Ok(());
-    }
-
-    ctx.defer().await?;
-    let mut users = HashSet::new();
-    let mut messages = MessagesIter::stream(ctx.http(), channel.id).boxed();
-    while let Some(message_result) = messages.next().await {
-        match message_result {
-            Ok(message) => {
-                println!("Message.");
-                if !message.author.bot() {
-                    users.insert(message.author.id);
-                }
-            }
-            Err(error) => println!("wtf: {error}"),
-        }
-    }
-
-    let mut string = String::from("Feel free to paste this whereever: ");
-    for user in users {
-        write!(string, "{}", user.mention()).unwrap();
-    }
-    let mentions = serenity::CreateAllowedMentions::new()
-        .all_users(false)
-        .everyone(false)
-        .all_roles(false);
-
-    ctx.send(
-        lumi::CreateReply::new()
-            .content(string)
-            .allowed_mentions(mentions),
-    )
-    .await?;
-
-    Ok(())
-}
-
-// not really meta, but i don't have a misc section.
-#[lumi::command(prefix_command, hide_in_help, guild_only, discard_spare_arguments)]
-pub async fn template(
-    ctx: crate::PrefixContext<'_>,
-    file: serenity::Attachment,
-) -> Result<(), Error> {
-    async fn inner(bytes: Vec<u8>) -> Result<(), Error> {
-        if serde_json::from_str::<serde_json::Value>(str::from_utf8(&bytes)?).is_ok() {
-            let mut file =
-                tokio::fs::File::create("/srv/chibisafe/uploads/mothtemplate.json").await?;
-            file.write_all(&bytes).await?;
-        } else {
-            return Err("Not a valid json file.".into());
-        }
-
-        Ok(())
-    }
-
-    if !matches!(
-        ctx.author().id.get(),
-        158567567487795200 | 291089948709486593
-    ) {
-        msg_or_reaction(ctx, "Nuh uh.", Anger::to_fixed_string()).await;
-        return Ok(());
-    }
-
-    // a template is not even close to this big.
-    if file.size > 1_000_000 {
-        msg_or_reaction(ctx, "too big...", Question::to_fixed_string()).await;
-        return Ok(());
-    }
-
-    let bytes = file.download().await?;
-
-    match inner(bytes).await {
-        Ok(()) => msg_or_reaction(ctx, "Done!", Checkmark::to_fixed_string()).await,
-        Err(e) => msg_or_reaction(ctx, &e.to_string(), Question::to_fixed_string()).await,
-    }
-
-    Ok(())
-}
-
 #[must_use]
-pub fn commands() -> [crate::Command; 9] {
+pub fn commands() -> [crate::Command; 7] {
     [
         uptime(),
         source(),
@@ -408,7 +312,5 @@ pub fn commands() -> [crate::Command; 9] {
         stats(),
         overwrite(),
         find_overwrite(),
-        scawy(),
-        template(),
     ]
 }
