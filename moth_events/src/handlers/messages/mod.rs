@@ -230,6 +230,10 @@ async fn check_event_dm_regex(
     if patterns.iter().any(|pattern| {
         pattern.is_match(&msg.content) && msg.author.id != 158567567487795200 && !msg.author.bot()
     }) {
+        if matches!(msg.author.id.get(), 441785661503176724 | 840780008623570954) {
+            return;
+        }
+
         let _ = pattern_matched(ctx, msg, guild_name).await;
     }
 }
@@ -263,16 +267,35 @@ async fn pattern_matched(ctx: &serenity::Context, msg: &Message, guild: &str) ->
 }
 
 async fn handle_dm(ctx: &serenity::Context, msg: &Message) -> Result<(), Error> {
+    let (user, is_interaction) = if let Some(metadata) = &msg.interaction_metadata.as_deref() {
+        let data = match *metadata {
+            serenity::MessageInteractionMetadata::Command(data) => &data.user,
+            serenity::MessageInteractionMetadata::Component(data) => &data.user,
+            serenity::MessageInteractionMetadata::ModalSubmit(data) => &data.user,
+            _ => &msg.author,
+        };
+
+        (data, true)
+    } else {
+        (&msg.author, false)
+    };
+
     // TODO: use fw owner's or make configurable.
     if msg.guild_id.is_some()
-        || [158567567487795200, ctx.cache.current_user().id.get()].contains(&msg.author.id.get())
+        || [158567567487795200, ctx.cache.current_user().id.get()].contains(&user.id.get())
     {
         return Ok(());
     }
 
+    let mut description = format!("**{}**: {}", msg.author.tag(), msg.content);
+
+    if is_interaction {
+        description.push_str("(was interaction)");
+    }
+
     let embed = serenity::CreateEmbed::default()
         .title("I was messaged!")
-        .description(format!("**{}**: {}", msg.author.tag(), msg.content))
+        .description(description)
         .color(Colour::from_rgb(0, 255, 0))
         .footer(CreateEmbedFooter::new(format!("{}", msg.channel_id)));
 
