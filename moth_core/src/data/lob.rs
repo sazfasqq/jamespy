@@ -53,23 +53,35 @@ pub fn unload_lob() -> Result<(), Error> {
 }
 
 pub fn add_lob(content: &str) -> Result<(), Error> {
-    let mut file = OpenOptions::new().append(true).open(LOB_PATH)?;
+    let mut file = OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(LOB_PATH)?;
 
-    let content = format!("\n{content}");
-
+    let content = if content.starts_with('\n') || content.is_empty() {
+        content.to_string()
+    } else {
+        format!("\n{content}")
+    };
     file.write_all(content.as_bytes())?;
 
-    let file_content = std::fs::read_to_string(LOB_PATH)?;
-
+    let file = std::fs::File::open(LOB_PATH)?;
+    let reader = BufReader::new(file);
     let mut unique_lines = HashSet::new();
-    let deduplicated_lines: Vec<&str> = file_content
+    let deduplicated_lines: Vec<String> = reader
         .lines()
-        .filter(|&line| !line.trim().is_empty() && unique_lines.insert(line))
+        .map_while(Result::ok)
+        .filter_map(|line| {
+            let trimmed = line.trim().to_string();
+            if trimmed.is_empty() || !unique_lines.insert(trimmed.clone()) {
+                None
+            } else {
+                Some(trimmed)
+            }
+        })
         .collect();
 
-    let updated_content = deduplicated_lines.join("\n");
-
-    std::fs::write(LOB_PATH, updated_content)?;
+    std::fs::write(LOB_PATH, deduplicated_lines.join("\n"))?;
 
     Ok(())
 }
