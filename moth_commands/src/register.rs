@@ -59,24 +59,26 @@ pub async fn register_application_commands_buttons<U: Send + Sync + 'static, E>(
         return Ok(());
     }
 
-    let components = serenity::CreateActionRow::Buttons(Cow::Owned(vec![
-        serenity::CreateButton::new("register.owner_commands")
-            .label("Register owner commands")
-            .style(serenity::ButtonStyle::Primary)
-            .emoji('📋'),
-        serenity::CreateButton::new("unregister.owner_commands")
-            .label("Unregister owner commands")
-            .style(serenity::ButtonStyle::Danger)
-            .emoji('🗑'),
-        serenity::CreateButton::new("register.global")
-            .label("Register globally")
-            .style(serenity::ButtonStyle::Primary)
-            .emoji('📋'),
-        serenity::CreateButton::new("unregister.global")
-            .label("Unregister globally")
-            .style(serenity::ButtonStyle::Danger)
-            .emoji('🗑'),
-    ]));
+    let components = serenity::all::CreateComponent::ActionRow(serenity::CreateActionRow::Buttons(
+        Cow::Owned(vec![
+            serenity::CreateButton::new("register.owner_commands")
+                .label("Register owner commands")
+                .style(serenity::ButtonStyle::Primary)
+                .emoji('📋'),
+            serenity::CreateButton::new("unregister.owner_commands")
+                .label("Unregister owner commands")
+                .style(serenity::ButtonStyle::Danger)
+                .emoji('🗑'),
+            serenity::CreateButton::new("register.global")
+                .label("Register globally")
+                .style(serenity::ButtonStyle::Primary)
+                .emoji('📋'),
+            serenity::CreateButton::new("unregister.global")
+                .label("Unregister globally")
+                .style(serenity::ButtonStyle::Danger)
+                .emoji('🗑'),
+        ]),
+    ));
 
     let builder = lumi::CreateReply::default()
         .content("Choose what to do with the commands:")

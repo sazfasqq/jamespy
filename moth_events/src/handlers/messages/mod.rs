@@ -21,22 +21,6 @@ use lumi::serenity_prelude::{
 };
 
 pub async fn message(ctx: &serenity::Context, msg: &Message, data: Arc<Data>) -> Result<(), Error> {
-    if msg.channel_id.get() == 1340010066442715227 {
-        if let Some(attachment) = msg.attachments.first() {
-            if let Ok(image_data) = attachment.download().await {
-                let text = data.ocr_engine.process(image_data).await;
-
-                let _ = msg
-                    .channel_id
-                    .say(
-                        &ctx.http,
-                        text.unwrap_or("failed to find text in media.".to_owned()),
-                    )
-                    .await;
-            }
-        }
-    }
-
     let mut dont_print = false;
     let (content, patterns) = {
         let config = &data.config.read().events;

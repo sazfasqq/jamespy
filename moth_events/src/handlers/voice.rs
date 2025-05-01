@@ -1,3 +1,5 @@
+use ::serenity::all::{CreateEmbed, CreateMessage, EditMessage, GenericChannelId};
+use chrono::{Duration, Utc};
 use std::borrow::Cow;
 
 use crate::{
@@ -6,6 +8,7 @@ use crate::{
 };
 use lumi::serenity_prelude::{self as serenity, VoiceState};
 use moth_ansi::{GREEN, RESET};
+use moth_core::data::structs::Data;
 
 pub async fn voice_state_update(
     ctx: &serenity::Context,
@@ -43,36 +46,40 @@ async fn handle_switch(
         None => return Ok(()),
     };
 
-    let guild_cache = ctx.cache.guild(new.guild_id.unwrap());
-    // will fire real error in the future.
+    {
+        let guild_cache = ctx.cache.guild(new.guild_id.unwrap());
+        // will fire real error in the future.
 
-    let Some(guild_cache) = guild_cache else {
-        return Ok(());
-    };
+        let Some(guild_cache) = guild_cache else {
+            return Ok(());
+        };
 
-    let channel_old_name = guild_cache.channels.get(&old_id).map(|c| &c.base.name);
-    let channel_new_name = guild_cache.channels.get(&new_id).map(|c| &c.base.name);
+        let channel_old_name = guild_cache.channels.get(&old_id).map(|c| &c.base.name);
+        let channel_new_name = guild_cache.channels.get(&new_id).map(|c| &c.base.name);
 
-    // maybe i should use fixedstring directly?
-    let old_name: Cow<str> = if let Some(channel_name) = channel_old_name {
-        Cow::Borrowed(channel_name)
-    } else {
-        Cow::Borrowed("None")
-    };
+        // maybe i should use fixedstring directly?
+        let old_name: Cow<str> = if let Some(channel_name) = channel_old_name {
+            Cow::Borrowed(channel_name)
+        } else {
+            Cow::Borrowed("None")
+        };
 
-    // ditto
-    let new_name: Cow<str> = if let Some(channel_name) = channel_new_name {
-        Cow::Borrowed(channel_name)
-    } else {
-        Cow::Borrowed("None")
-    };
+        // ditto
+        let new_name: Cow<str> = if let Some(channel_name) = channel_new_name {
+            Cow::Borrowed(channel_name)
+        } else {
+            Cow::Borrowed("None")
+        };
 
-    let guild_name = get_guild_name_override(ctx, &ctx.data(), new.guild_id);
+        let guild_name = get_guild_name_override(ctx, &ctx.data(), new.guild_id);
 
-    println!(
-        "{GREEN}[{guild_name}] {user_name}: {old_name} (ID:{old_id}) -> {new_name} \
-         (ID:{new_id}){RESET}"
-    );
+        println!(
+            "{GREEN}[{guild_name}] {user_name}: {old_name} (ID:{old_id}) -> {new_name} \
+             (ID:{new_id}){RESET}"
+        );
+    }
+
+    maybe_handle(ctx, new).await?;
 
     Ok(())
 }
@@ -115,19 +122,102 @@ async fn handle_joins(ctx: &serenity::Context, new: &VoiceState) -> Result<(), E
         None => return Ok(()),
     };
 
-    let guild_cache = ctx.cache.guild(new.guild_id.unwrap());
-    // will fire real error in the future.
+    {
+        let guild_cache = ctx.cache.guild(new.guild_id.unwrap());
+        // will fire real error in the future.
 
-    let Some(guild_cache) = guild_cache else {
+        let Some(guild_cache) = guild_cache else {
+            return Ok(());
+        };
+
+        let channel = guild_cache.channels.get(&channel_id).unwrap();
+
+        let channel_name = &channel.base.name;
+
+        let guild_name = get_guild_name_override(ctx, &ctx.data(), Some(channel.base.guild_id));
+
+        println!(
+            "{GREEN}[{guild_name}] {user_name} joined {channel_name} (ID:{channel_id}){RESET}"
+        );
+    }
+
+    maybe_handle(ctx, new).await?;
+
+    Ok(())
+}
+
+#[expect(clippy::similar_names)]
+pub async fn maybe_handle(ctx: &serenity::Context, new: &VoiceState) -> Result<(), Error> {
+    let data = ctx.data::<Data>();
+
+    let to_handle = {
+        let voice_fuckery = data.new_join_vc.get(&new.user_id);
+        if let Some(voice) = voice_fuckery {
+            if voice.cleared {
+                None
+            } else {
+                let current_time = Utc::now();
+                let timestamp = voice.member.joined_at.unwrap_or_default();
+                let time_diff = current_time.signed_duration_since(*timestamp);
+
+                if time_diff <= Duration::hours(1) {
+                    Some(voice.clone())
+                } else {
+                    None
+                }
+            }
+        } else {
+            None
+        }
+    };
+
+    let Some(to_handle) = to_handle else {
         return Ok(());
     };
 
-    let channel = guild_cache.channels.get(&channel_id).unwrap();
+    let new_message = if let Some(announce) = to_handle.announce_msg {
+        let now = Utc::now();
+        *announce.created_at() < now - Duration::minutes(30)
+    } else {
+        true
+    };
 
-    let channel_name = &channel.base.name;
+    let content = format!("<@158567567487795200>: <@{}>", to_handle.member.user.id);
 
-    let guild_name = get_guild_name_override(ctx, &ctx.data(), Some(channel.base.guild_id));
+    let embed = CreateEmbed::new()
+        .title(to_handle.member.user.name.clone())
+        .description("New join joined VC!")
+        .field(
+            "Joined at",
+            format!(
+                "<t:{}:R>",
+                to_handle.member.joined_at.unwrap_or_default().timestamp()
+            ),
+            true,
+        )
+        .field("VC", format!("<#{}>", new.channel_id.unwrap()), true)
+        .thumbnail(to_handle.member.user.face());
 
-    println!("{GREEN}[{guild_name}] {user_name} joined {channel_name} (ID:{channel_id}){RESET}");
+    if new_message {
+        let val = GenericChannelId::new(158484765136125952)
+            .send_message(
+                &ctx.http,
+                CreateMessage::new().content(content).embed(embed),
+            )
+            .await?;
+
+        if let Some(mut m) = data.new_join_vc.get_mut(&new.user_id) {
+            m.announce_msg = Some(val.id);
+        };
+    } else {
+        let _ = GenericChannelId::new(158484765136125952)
+            .edit_message(
+                &ctx.http,
+                to_handle.announce_msg.unwrap(),
+                EditMessage::new().embed(embed).content(content),
+            )
+            .await;
+    }
+
     Ok(())
 }

@@ -184,7 +184,7 @@ async fn new(
     let msg = reaction.message(ctx).await?;
 
     let (content, forwarded) = if let Some(snapshot) = msg.message_snapshots.first() {
-        (snapshot.content.clone(), true)
+        (snapshot.content.to_string(), true)
     } else {
         (msg.content.to_string(), false)
     };
@@ -304,14 +304,16 @@ macro_rules! starboard_message_macro {
             .embeds(starboard_embeds($data, $starboard_msg));
 
         if $starboard_msg.starboard_status == StarboardStatus::InReview {
-            let components = serenity::CreateActionRow::Buttons(std::borrow::Cow::Owned(vec![
-                serenity::CreateButton::new("starboard_accept")
-                    .label("Accept")
-                    .style(serenity::ButtonStyle::Primary),
-                serenity::CreateButton::new("starboard_deny")
-                    .label("Deny")
-                    .style(serenity::ButtonStyle::Danger),
-            ]));
+            let components = serenity::all::CreateComponent::ActionRow(
+                serenity::CreateActionRow::Buttons(std::borrow::Cow::Owned(vec![
+                    serenity::CreateButton::new("starboard_accept")
+                        .label("Accept")
+                        .style(serenity::ButtonStyle::Primary),
+                    serenity::CreateButton::new("starboard_deny")
+                        .label("Deny")
+                        .style(serenity::ButtonStyle::Danger),
+                ])),
+            );
             message = message.components(vec![components]);
 
             message = message.content(format!(

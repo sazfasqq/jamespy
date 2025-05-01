@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{collections::HashSet, sync::Arc};
 
 mod member_roles;
 pub(crate) mod roles;
@@ -15,6 +15,7 @@ use lumi::serenity_prelude::{
 use moth_ansi::{RESET, YELLOW};
 
 use ::serenity::all::GenericChannelId;
+use moth_core::data::structs::Fuck;
 use serenity::model::guild::audit_log::Action;
 
 pub async fn guild_create(
@@ -40,6 +41,16 @@ pub async fn guild_member_addition(
 ) -> Result<(), Error> {
     let guild_id = new_member.guild_id;
     let joined_user_id = new_member.user.id;
+
+    data.new_join_vc.insert(
+        new_member.user.id,
+        Fuck {
+            member: new_member.clone(),
+            channels: HashSet::new(),
+            cleared: false,
+            announce_msg: None,
+        },
+    );
 
     let guild_name = get_guild_name_override(ctx, &data, Some(guild_id));
 

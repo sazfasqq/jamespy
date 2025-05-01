@@ -1,7 +1,12 @@
-use ::serenity::all::GenericChannelId;
-use lumi::serenity_prelude::{
-    self as serenity, Attachment, ChunkGuildFilter, Message, ReactionType, StickerId, UserId,
+use ::serenity::all::{CreateAttachment, GenericChannelId};
+use lumi::{
+    serenity_prelude::{
+        self as serenity, Attachment, ChunkGuildFilter, Message, ReactionType, StickerId, UserId,
+    },
+    CreateReply,
 };
+
+use std::fmt::Write;
 
 use crate::{owner::owner, Context, Error};
 
@@ -283,8 +288,41 @@ async fn analyze(ctx: Context<'_>, #[rest] msg: String) -> Result<(), Error> {
     Ok(())
 }
 
+#[lumi::command(
+    rename = "members-dump",
+    prefix_command,
+    check = "owner",
+    category = "Owner - Commands",
+    hide_in_help,
+    guild_only
+)]
+async fn members_dump(ctx: Context<'_>) -> Result<(), Error> {
+    let mut writer = String::new();
+
+    {
+        let Some(guild) = ctx.guild() else {
+            ctx.say("guild is not cached.").await?;
+            return Ok(());
+        };
+
+        for member in &guild.members {
+            writeln!(
+                writer,
+                "{}: {:?}: {:?} (ID:{})",
+                member.user.name, member.user.global_name, member.nick, member.user.id
+            )
+            .unwrap();
+        }
+    }
+
+    ctx.send(CreateReply::new().attachment(CreateAttachment::bytes(writer, "members.txt")))
+        .await?;
+
+    Ok(())
+}
+
 #[must_use]
-pub fn commands() -> [crate::Command; 9] {
+pub fn commands() -> [crate::Command; 10] {
     let say = lumi::Command {
         slash_action: say_slash().slash_action,
         parameters: say_slash().parameters,
@@ -301,5 +339,6 @@ pub fn commands() -> [crate::Command; 9] {
         fw_commands(),
         sudo(),
         analyze(),
+        members_dump(),
     ]
 }

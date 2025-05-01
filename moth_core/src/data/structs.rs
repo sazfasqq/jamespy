@@ -1,6 +1,10 @@
 use dashmap::DashMap;
 use parking_lot::RwLock;
-use std::{collections::HashMap, time::Instant};
+use serenity::all::{ChannelId, Member};
+use std::{
+    collections::{HashMap, HashSet},
+    time::Instant,
+};
 
 use lumi::serenity_prelude::{GenericChannelId, GuildId, MessageId, UserId};
 
@@ -27,6 +31,16 @@ pub struct Data {
     pub anti_delete_cache: AntiDeleteCache,
     pub starboard_config: StarboardConfig,
     pub ocr_engine: crate::ocr::OcrEngine,
+    /// ugh
+    pub new_join_vc: DashMap<UserId, Fuck>,
+}
+
+#[derive(Clone, Debug)]
+pub struct Fuck {
+    pub member: Member,
+    pub channels: HashSet<ChannelId>,
+    pub cleared: bool,
+    pub announce_msg: Option<MessageId>,
 }
 
 /// A struct only used to track if an error comes from a cooldown.

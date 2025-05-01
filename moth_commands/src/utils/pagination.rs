@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use ::serenity::all::CreateComponent;
 use lumi::serenity_prelude::{
     self as serenity, ComponentInteractionCollector, CreateActionRow, CreateEmbedFooter,
     CreateInteractionResponse,
@@ -25,10 +26,12 @@ pub async fn presence_builder<U: Send + Sync + 'static, E>(
         .send(
             lumi::CreateReply::default()
                 .embed(create_presence_embed(current_page, &footer, &pages))
-                .components(vec![CreateActionRow::Buttons(Cow::Owned(vec![
-                    serenity::CreateButton::new(&prev_button_id).emoji('◀'),
-                    serenity::CreateButton::new(&next_button_id).emoji('▶'),
-                ]))]),
+                .components(vec![CreateComponent::ActionRow(CreateActionRow::Buttons(
+                    Cow::Owned(vec![
+                        serenity::CreateButton::new(&prev_button_id).emoji('◀'),
+                        serenity::CreateButton::new(&next_button_id).emoji('▶'),
+                    ]),
+                ))]),
         )
         .await?;
 

@@ -49,7 +49,17 @@ pub async fn source(ctx: Context<'_>) -> Result<(), Error> {
     interaction_context = "Guild|BotDm|PrivateChannel"
 )]
 pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
-    let shard_latency = ctx.serenity_context().runner_info.lock().unwrap().latency;
+    let shard_latency = {
+        let Some(shard) = ctx
+            .serenity_context()
+            .runners
+            .get(&ctx.serenity_context().shard_id)
+        else {
+            return Ok(());
+        };
+
+        shard.0.latency
+    };
 
     // right now i don't have the patience to drop the allocations here where they could be avoided.
     // i'll wait until a macro exists to do this for me.

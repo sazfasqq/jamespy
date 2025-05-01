@@ -47,7 +47,7 @@ leptess = "0.14.0"
 [workspace.dependencies.serenity]
 git = "https://github.com/serenity-rs/serenity"
 #path = "../serenity"
-features = ["temp_cache"]
+features = ["temp_cache", "unstable"]
 default-features = false
 branch = "next"
 
@@ -55,6 +55,7 @@ branch = "next"
 [workspace.dependencies.lumi]
 git = "https://github.com/moth-rs/lumi"
 branch = "main"
+features = ["unstable"]
 
 # patch for developing locally.
 #[patch."https://github.com/serenity-rs/serenity".serenity]
@@ -62,6 +63,10 @@ branch = "main"
 
 #[patch.'https://github.com/serenity-rs/serenity']
 #serenity = { git = 'https://github.com/jamesbt365/serenity', branch = 'next-downgrade-tokio-tungstenite' }
+
+[patch.'https://github.com/serenity-rs/serenity']
+serenity = { git = 'https://github.com/jamesbt365/serenity', branch = 'components-v2' }
+
 
 
 [profile.release]

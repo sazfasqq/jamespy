@@ -4,8 +4,8 @@ use std::{borrow::Cow, fmt::Write};
 use crate::{Context, Error};
 use lumi::CreateReply;
 use serenity::all::{
-    ComponentInteractionCollector, CreateActionRow, CreateButton, CreateEmbed, CreateEmbedFooter,
-    CreateInteractionResponse, CreateInteractionResponseMessage, EmojiId,
+    ComponentInteractionCollector, CreateActionRow, CreateButton, CreateComponent, CreateEmbed,
+    CreateEmbedFooter, CreateInteractionResponse, CreateInteractionResponseMessage, EmojiId,
 };
 
 use super::{Expression, ExpressionCounts};
@@ -109,10 +109,12 @@ pub(super) async fn display_expressions(
     let previous_id = aformat!("{ctx_id}previous");
     let next_id = aformat!("{ctx_id}next");
 
-    let components = [CreateActionRow::Buttons(Cow::Owned(vec![
-        CreateButton::new(previous_id.as_str()).emoji('◀'),
-        CreateButton::new(next_id.as_str()).emoji('▶'),
-    ]))];
+    let components = [CreateComponent::ActionRow(CreateActionRow::Buttons(
+        Cow::Owned(vec![
+            CreateButton::new(previous_id.as_str()).emoji('◀'),
+            CreateButton::new(next_id.as_str()).emoji('▶'),
+        ]),
+    ))];
 
     let builder = builder.components(&components);
 

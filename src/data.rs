@@ -1,3 +1,4 @@
+use dashmap::DashMap;
 use moth_core::data::structs::{Data, StarboardConfig};
 use serenity::all::{GenericChannelId, GuildId};
 use std::sync::{atomic::AtomicBool, Arc};
@@ -17,6 +18,7 @@ pub async fn setup() -> Arc<Data> {
         anti_delete_cache: moth_core::data::structs::AntiDeleteCache::default(),
         starboard_config,
         ocr_engine: moth_core::ocr::OcrEngine::new(),
+        new_join_vc: DashMap::default(),
     })
 }
 

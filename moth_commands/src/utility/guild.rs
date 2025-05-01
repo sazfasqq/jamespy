@@ -1,4 +1,5 @@
 use crate::{Context, Error};
+use ::serenity::all::CreateComponent;
 use lumi::serenity_prelude::{
     self as serenity, ComponentInteractionCollector, CreateActionRow, CreateInteractionResponse,
     EmojiId, StickerFormatType,
@@ -78,10 +79,12 @@ pub async fn stickers(ctx: Context<'_>) -> Result<(), Error> {
         .send(
             lumi::CreateReply::default()
                 .embed(pages[0].clone())
-                .components(vec![CreateActionRow::Buttons(Cow::Owned(vec![
-                    serenity::CreateButton::new(&prev_button_id).emoji('◀'),
-                    serenity::CreateButton::new(&next_button_id).emoji('▶'),
-                ]))]),
+                .components(vec![CreateComponent::ActionRow(CreateActionRow::Buttons(
+                    Cow::Owned(vec![
+                        serenity::CreateButton::new(&prev_button_id).emoji('◀'),
+                        serenity::CreateButton::new(&next_button_id).emoji('▶'),
+                    ]),
+                ))]),
         )
         .await?;
 
