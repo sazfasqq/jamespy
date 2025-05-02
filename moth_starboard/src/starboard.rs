@@ -181,6 +181,44 @@ async fn new(
     data: &Arc<Data>,
     reaction: &serenity::Reaction,
 ) -> Result<(), Error> {
+    fn starboard_threshold(
+        ctx: &serenity::Context,
+        data: &Arc<Data>,
+        reaction: &serenity::Reaction,
+    ) -> u8 {
+        let parent_id = {
+            let Some(guild) = ctx.cache.guild(data.starboard_config.guild_id) else {
+                // if in doubt, default.
+                return data.starboard_config.threshold;
+            };
+
+            let Some(generic_channel) = guild.channel(reaction.channel_id) else {
+                // ditto
+                return data.starboard_config.threshold;
+            };
+
+            match generic_channel {
+                serenity::GenericGuildChannelRef::Channel(_) => None,
+                serenity::GenericGuildChannelRef::Thread(guild_thread) => {
+                    Some(guild_thread.parent_id.widen())
+                }
+            }
+        };
+
+        let overrides = &data.database.starboard.lock().overrides;
+        if let Some(parent_id) = parent_id {
+            // is a thread, check thread and fallback to channel if not.
+            *overrides
+                .get(&reaction.channel_id)
+                .or_else(|| overrides.get(&parent_id))
+                .unwrap_or(&data.starboard_config.threshold)
+        } else {
+            *overrides
+                .get(&reaction.channel_id)
+                .unwrap_or(&data.starboard_config.threshold)
+        }
+    }
+
     let msg = reaction.message(ctx).await?;
 
     let (content, forwarded) = if let Some(snapshot) = msg.message_snapshots.first() {
@@ -196,7 +234,7 @@ async fn new(
 
     let star_count = get_reaction_count(ctx, data, reaction, msg.author.id, Some(true)).await?;
 
-    if star_count < data.starboard_config.threshold as i16 {
+    if star_count < starboard_threshold(ctx, data, reaction) as i16 {
         return Ok(());
     }
 

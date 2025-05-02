@@ -1,6 +1,6 @@
 use dashmap::DashMap;
 use parking_lot::RwLock;
-use serenity::all::{ChannelId, Member};
+use serenity::all::{ChannelId, Member, RoleId};
 use std::{
     collections::{HashMap, HashSet},
     time::Instant,
@@ -58,6 +58,7 @@ pub struct StarboardConfig {
     pub star_emoji: String,
     /// The single guild the starboard is configured for.
     pub guild_id: GuildId,
+    pub allowed_role: RoleId,
     pub threshold: u8,
 }
 

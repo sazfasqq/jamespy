@@ -1,6 +1,6 @@
 use dashmap::DashMap;
 use moth_core::data::structs::{Data, StarboardConfig};
-use serenity::all::{GenericChannelId, GuildId};
+use serenity::all::{GenericChannelId, GuildId, RoleId};
 use std::sync::{atomic::AtomicBool, Arc};
 
 pub async fn setup() -> Arc<Data> {
@@ -48,6 +48,7 @@ fn starboard_config() -> StarboardConfig {
             1324437745854316564
         ),
         guild_id: get_env_or_default!("STARBOARD_GUILD", GuildId, 98226572468690944),
+        allowed_role: get_env_or_default!("STARBOARD_ROLE", RoleId, 98459030455853056),
         star_emoji: std::env::var("STARBOARD_EMOJI").unwrap_or("⭐".to_owned()),
         threshold: std::env::var("STARBOARD_THRESHOLD")
             .ok()

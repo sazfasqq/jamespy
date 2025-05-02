@@ -120,10 +120,14 @@ pub async fn init_data() -> Database {
     }
 
     Database {
+        starboard: Mutex::new(
+            StarboardHandler::new(&database)
+                .await
+                .expect("Database must be avaliable."),
+        ),
         db: database,
         owner_overwrites: checks,
         banned_users,
-        starboard: Mutex::new(StarboardHandler::default()),
         dm_activity: DashMap::new(),
         responses: ResponseCache::default(),
     }
@@ -152,15 +156,38 @@ pub struct Database {
     pub(crate) responses: ResponseCache,
 }
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct StarboardHandler {
     messages: Vec<StarboardMessage>,
     being_handled: HashSet<MessageId>,
     // message id is the appropriate in messages, the first userid is the author
     // the collection is the reaction users.
     pub reactions_cache: HashMap<MessageId, (UserId, Vec<UserId>)>,
+    pub overrides: HashMap<GenericChannelId, u8>,
 }
 
+impl StarboardHandler {
+    async fn new(db: &PgPool) -> Result<Self, Error> {
+        let results = sqlx::query!("SELECT * FROM starboard_overrides")
+            .fetch_all(db)
+            .await?;
+
+        let mut overrides = HashMap::with_capacity(results.len());
+        for result in results {
+            overrides.insert(
+                GenericChannelId::new(result.channel_id as u64),
+                result.star_count as u8,
+            );
+        }
+
+        Ok(Self {
+            overrides,
+            messages: Vec::new(),
+            being_handled: HashSet::new(),
+            reactions_cache: HashMap::new(),
+        })
+    }
+}
 #[derive(Clone, Debug, Default)]
 pub struct Checks {
     // Users under this will have access to all owner commands.
@@ -755,6 +782,65 @@ impl Database {
         }
 
         Ok(guard.messages.clone())
+    }
+
+    pub async fn add_starboard_override(
+        &self,
+        starboard_handler: &Mutex<StarboardHandler>,
+        channel_id: GenericChannelId,
+        starcount: u8,
+    ) -> Result<(), Error> {
+        // TODO: use starboard config directly to avoid panic
+        self.insert_channel(
+            channel_id,
+            std::env::var("STARBOARD_GUILD")
+                .unwrap()
+                .parse::<u64>()
+                .map(std::convert::Into::into)
+                .ok(),
+        )
+        .await?;
+
+        sqlx::query!(
+            r#"
+            INSERT INTO starboard_overrides (channel_id, star_count)
+            VALUES ($1, $2)
+            ON CONFLICT (channel_id) DO UPDATE
+            SET star_count = EXCLUDED.star_count
+            "#,
+            channel_id.get() as i64,
+            i16::from(starcount)
+        )
+        .execute(&self.db)
+        .await?;
+
+        starboard_handler
+            .lock()
+            .overrides
+            .insert(channel_id, starcount);
+
+        Ok(())
+    }
+
+    pub async fn remove_starboard_override(
+        &self,
+        starboard_handler: &Mutex<StarboardHandler>,
+        channel_id: GenericChannelId,
+    ) -> Result<bool, Error> {
+        let result = sqlx::query!(
+            "DELETE FROM starboard_overrides WHERE channel_id = $1",
+            channel_id.get() as i64
+        )
+        .execute(&self.db)
+        .await?;
+
+        if result.rows_affected() == 0 {
+            return Ok(false);
+        }
+
+        starboard_handler.lock().overrides.remove(&channel_id);
+
+        Ok(true)
     }
 
     // temporary function to give access to the inner command overwrites while i figure something out.

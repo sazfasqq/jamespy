@@ -271,11 +271,11 @@ async fn handle_dm(ctx: &serenity::Context, msg: &Message) -> Result<(), Error> 
         return Ok(());
     }
 
-    let mut description = format!("**{}**: {}", msg.author.tag(), msg.content);
-
     if is_interaction {
-        description.push_str("(was interaction)");
+        return Ok(());
     }
+
+    let description = format!("**{}**: {}", msg.author.tag(), msg.content);
 
     let embed = serenity::CreateEmbed::default()
         .title("I was messaged!")

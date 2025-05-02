@@ -1,9 +1,9 @@
 use std::{str::FromStr, sync::Arc};
 
 use crate::{Data, Error};
-use ::serenity::all::{CreateInteractionResponseMessage, UserId};
-use moth_core::data::database::StarboardStatus;
+use ::serenity::all::CreateInteractionResponseMessage;
 use lumi::serenity_prelude as serenity;
+use moth_core::data::database::StarboardStatus;
 
 use super::starboard::starboard_message;
 
@@ -27,13 +27,20 @@ pub async fn handle_component(
         return Ok(());
     }
 
-    if !allowed_user(interaction.user.id) {
+    // in guild
+    if !interaction
+        .member
+        .as_ref()
+        .unwrap()
+        .roles
+        .contains(&data.starboard_config.allowed_role)
+    {
         interaction
             .create_response(
                 &ctx.http,
                 serenity::CreateInteractionResponse::Message(
                     CreateInteractionResponseMessage::new()
-                        .content("You aren't Phil, Ruben or Moxy")
+                        .content("You are not allowed to do this.")
                         .ephemeral(true),
                 ),
             )
@@ -127,15 +134,4 @@ async fn deny(
     data.database.deny_starboard(interaction.message.id).await?;
 
     Ok(())
-}
-
-fn allowed_user(user_id: UserId) -> bool {
-    // Phil, Ruben, me
-    let a = [
-        UserId::new(101090238067113984),
-        UserId::new(291089948709486593),
-        UserId::new(158567567487795200),
-    ];
-
-    a.contains(&user_id)
 }
